@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SDF maker</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<div id="wrapper">
+    <h1>SDF maker</h1>
+    <p>Released <a target="_blank" href="https://github.com/jobtalle/SDFMaker">on GitHub</a> under the <a target="_blank" href="https://github.com/jobtalle/SDFMaker/blob/master/LICENSE">MIT license</a>. Made by <a target="_blank" href="https://jobtalle.com/">Job Talle</a>.</p>
+    <div id="input" class="panel">
+        <div id="input-left">
+            <div id="settings">
+                <table>
+                    <tr>
+                        <td>Width:</td>
+                        <td><input type="number" id="setting-width"></td>
+                    </tr>
+                    <tr>
+                        <td>Height:</td>
+                        <td><input type="number" id="setting-height"></td>
+                    </tr>
+                    <tr>
+                        <td>Radius:</td>
+                        <td><input type="number" id="setting-radius" min="1" max="256"></td>
+                    </tr>
+                </table>
+                <button>Generate</button>
+            </div>
+        </div>
+        <div id="input-right">
+            <p>Drop a .png image here:</p>
+            <canvas id="input-target" width="256" height="256"></canvas>
+            <div id="input-info"></div>
+        </div>
+    </div>
+    <div id="output" class="panel">
+
+    </div>
+</div>
+<script src="js/main.js" type="module"></script>
+</body>
+</html>

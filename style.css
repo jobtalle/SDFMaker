@@ -1,0 +1,71 @@
+:root {
+    --dark: #27292c;
+    --bright: #eeeeee;
+    --link: #de5840;
+}
+
+body {
+    background-color: var(--dark);
+    font-family: monospace;
+    color: var(--bright);
+    display: flex;
+    justify-content: center;
+}
+
+body a {
+    color: var(--bright);
+}
+
+body a:hover {
+    color: var(--link);
+}
+
+.panel {
+    border: 1px solid var(--bright);
+    padding: 8px;
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+#wrapper h1 {
+    text-align: center;
+}
+
+#wrapper > .panel {
+    margin: 4px;
+}
+
+#input {
+    display: flex;
+    flex-direction: row;
+}
+
+#input-left {
+    display: flex;
+    align-items: flex-end;
+    margin-right: 16px;
+}
+
+#input-target {
+    transition: .1s;
+    border: 1px solid var(--bright);
+}
+
+#input-target.hover {
+    background-color: var(--bright);
+}
+
+#input-target h2 {
+    user-select: none;
+}
+
+#settings input {
+    width: 64px;
+}
+
+#settings button {
+    width: 100%;
+}
