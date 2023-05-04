@@ -1,6 +1,5 @@
 export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
-    static #MAX_SIZE = 32768;
 
     #inputTarget;
     #inputInfo;
@@ -43,9 +42,13 @@ export class SDFMaker {
             if (isNaN(settingWidth.value) || !Number.isInteger(parseFloat(settingWidth.value)))
                 this.#outputWidth = 1;
             else
-                this.#outputWidth = Math.min(SDFMaker.#MAX_SIZE, Math.max(1, parseInt(settingWidth.value)));
+                this.#outputWidth = Math.min(
+                    settingWidth.max,
+                    Math.max(settingWidth.min, parseInt(settingWidth.value)));
 
-            this.#outputHeight = Math.round(this.#outputWidth / this.#aspect);
+            this.#outputHeight = Math.min(
+                settingHeight.max,
+                Math.max(settingHeight.min, Math.round(this.#outputWidth / this.#aspect)));
 
             settingWidth.value = this.#outputWidth;
             settingHeight.value = this.#outputHeight;
@@ -55,9 +58,13 @@ export class SDFMaker {
             if (isNaN(settingHeight.value) || !Number.isInteger(parseFloat(settingHeight.value)))
                 this.#outputHeight = 1;
             else
-                this.#outputHeight = Math.min(SDFMaker.#MAX_SIZE, Math.max(1, parseInt(settingHeight.value)));
+                this.#outputHeight = Math.min(
+                    settingHeight.max,
+                    Math.max(settingHeight.min, parseInt(settingHeight.value)));
 
-            this.#outputWidth = Math.round(this.#outputHeight * this.#aspect);
+            this.#outputWidth = Math.min(
+                settingWidth.max,
+                Math.max(settingWidth.min, Math.round(this.#outputHeight * this.#aspect)));
 
             settingWidth.value = this.#outputWidth;
             settingHeight.value = this.#outputHeight;
@@ -67,7 +74,9 @@ export class SDFMaker {
             if (isNaN(settingRadius.value) || !Number.isInteger(parseFloat(settingRadius.value)))
                 this.#radius = 1;
             else
-                this.#radius = Math.min(settingRadius.max, Math.max(settingRadius.min, parseInt(settingRadius.value)));
+                this.#radius = Math.min(
+                    settingRadius.max,
+                    Math.max(settingRadius.min, parseInt(settingRadius.value)));
 
             settingRadius.value = this.#radius;
         };

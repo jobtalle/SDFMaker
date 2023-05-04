@@ -14,16 +14,28 @@
             <div id="settings">
                 <table>
                     <tr>
-                        <td>Width:</td>
-                        <td><input type="number" id="setting-width"></td>
+                        <td>
+                            <label for="setting-width">Width:</label>
+                        </td>
+                        <td>
+                            <input type="number" id="setting-width" min="1" max="32768">
+                        </td>
                     </tr>
                     <tr>
-                        <td>Height:</td>
-                        <td><input type="number" id="setting-height"></td>
+                        <td>
+                            <label for="setting-height">Height:</label>
+                        </td>
+                        <td>
+                            <input type="number" id="setting-height" min="1" max="32768">
+                        </td>
                     </tr>
                     <tr>
-                        <td>Radius:</td>
-                        <td><input type="number" id="setting-radius" min="1" max="256"></td>
+                        <td>
+                            <label for="setting-radius">Radius:</label>
+                        </td>
+                        <td>
+                            <input type="number" id="setting-radius" min="1" max="256">
+                        </td>
                     </tr>
                 </table>
                 <button>Generate</button>
