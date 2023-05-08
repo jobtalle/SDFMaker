@@ -105,8 +105,8 @@ export class SDFMaker {
         this.#settingWidth.value = image.width;
         this.#settingHeight.value = image.height;
         this.#aspect = image.width / image.height;
-        this.#inputWidth = image.width;
-        this.#inputHeight = image.height;
+        this.#inputWidth = this.#outputWidth = image.width;
+        this.#inputHeight = this.#outputHeight = image.height;
 
         const context = this.#inputTarget.getContext("2d");
         const scale = Math.min(
@@ -161,8 +161,12 @@ export class SDFMaker {
     }
 
     #generate() {
-        if (this.#shaderRadius !== this.#radius) {
-            this.#shaderRadius = this.#radius;
+        const kernelRadius = Math.max(
+            Math.ceil(this.#radius * (this.#inputWidth / this.#outputWidth)),
+            Math.ceil(this.#radius * (this.#inputHeight / this.#outputHeight)));
+
+        if (this.#shaderRadius !== kernelRadius) {
+            this.#shaderRadius = kernelRadius;
 
             this.#updateShader();
         }
