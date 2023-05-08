@@ -1,3 +1,5 @@
+import {ShaderSDF} from "./gl/shaderSDF.js";
+
 export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
 
@@ -12,13 +14,16 @@ export class SDFMaker {
     #inputHeight = 1;
     #outputWidth = 1;
     #outputHeight = 1;
+    #shader = null;
+    #shaderRadius = -1;
 
     constructor(
         inputTarget,
         inputInfo,
         settingWidth,
         settingHeight,
-        settingRadius) {
+        settingRadius,
+        buttonGenerate) {
         inputTarget.ondrop = event => {
             event.preventDefault();
 
@@ -80,6 +85,8 @@ export class SDFMaker {
 
             settingRadius.value = this.#radius;
         };
+
+        buttonGenerate.onclick = this.#generate.bind(this);
 
         this.#inputTarget = inputTarget;
         this.#inputInfo = inputInfo;
@@ -145,6 +152,19 @@ export class SDFMaker {
             }
             else
                 alert("Only .png files are supported");
+        }
+    }
+
+    #updateShader() {
+        this.#shader?.free();
+        this.#shader = new ShaderSDF(this.#shaderRadius);
+    }
+
+    #generate() {
+        if (this.#shaderRadius !== this.#radius) {
+            this.#shaderRadius = this.#radius;
+
+            this.#updateShader();
         }
     }
 }

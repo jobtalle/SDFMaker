@@ -6,4 +6,5 @@ new SDFMaker(
     document.getElementById("setting-width"),
     document.getElementById("setting-height"),
     document.getElementById("setting-radius"),
+    document.getElementById("button-generate")
 );
