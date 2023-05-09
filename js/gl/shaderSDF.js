@@ -43,7 +43,7 @@ export class ShaderSDF extends Shader {
             }
 
             outColor = vec4(
-                texture(source, vec2(pixel + nearestColor) / size).rgb,
+                texture(source, (vec2(pixel + nearestColor) + .5) / size).rgb,
                 .5 * (base * 2. - 1.) * sqrt(float(nearest)) / float(RADIUS) + .5);
         }
         `;
