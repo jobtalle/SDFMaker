@@ -45,8 +45,6 @@ export class Target {
     bind() {
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.#fbo);
         gl.viewport(0, 0, this.width, this.height);
-        gl.clearColor(1, 0, 0, 1)
-        gl.clear(gl.COLOR_BUFFER_BIT);
     }
 
     getPixels() {
