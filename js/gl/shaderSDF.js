@@ -22,19 +22,38 @@ export class ShaderSDF extends Shader {
         in vec2 vUv;
 
         out vec4 outColor;
+        
+        vec3 averageColor(const ivec2 pixel) {
+            vec3 color = vec3(0.);
+            int colors = 0;
+            
+            for (int y = 0; y < SAMPLES; ++y) {
+                for (int x = 0; x < SAMPLES; ++x) {
+                    vec4 fetched = texelFetch(source, pixel + ivec2(x, y), 0);
+                    
+                    if (fetched.a != 0.) {
+                        color += fetched.rgb;
+                        
+                        ++colors;
+                    }
+                }
+            }
+            
+            if (colors == 0)
+                return vec3(0.);
+            
+            return color / float(colors);
+        }
 
         void main() {
-            ivec2 pixel = ivec2(vUv * size);
-            vec4 baseTexel = texelFetch(source, pixel, 0);
-            float base = step(threshold, baseTexel.a);
+            ivec2 pixel = ivec2(vUv * size + .5);
+            float base = step(threshold, texelFetch(source, pixel, 0).a);
             int nearest = RADIUS * RADIUS;
             ivec2 colorPixel = ivec2(0);
 
             for (int y = -RADIUS; y <= RADIUS; ++y) {
                 for (int x = -RADIUS; x <= RADIUS; ++x) {
-                    vec4 currentPixel = texelFetch(source, pixel + ivec2(x, y), 0);
-
-                    if (base != step(threshold, currentPixel.a)) {
+                    if (base != step(threshold, texelFetch(source, pixel + ivec2(x, y), 0).a)) {
                         nearest = min(nearest, x * x + y * y);
                         colorPixel = ivec2(x, y);
                     }
@@ -45,16 +64,18 @@ export class ShaderSDF extends Shader {
                 colorPixel = ivec2(0);
 
             outColor = vec4(
-            texture(source, (vec2(pixel + colorPixel) + .5) / size).rgb,
-            .5 * (base * 2. - 1.) * sqrt(float(nearest)) / float(RADIUS) + .5);
+                averageColor(ivec2(vUv * size)),
+                .5 * (base * 2. - 1.) * sqrt(float(nearest)) / float(RADIUS) + .5);
         }
     `;
 
     #uniformSize;
     #uniformThreshold;
 
-    constructor(radius) {
-        super(ShaderSDF.#SHADER_VERTEX, ShaderSDF.#SHADER_FRAGMENT, [["RADIUS", radius.toString()]]);
+    constructor(radius, samples) {
+        super(ShaderSDF.#SHADER_VERTEX, ShaderSDF.#SHADER_FRAGMENT, [
+            ["RADIUS", radius.toString()],
+            ["SAMPLES", samples.toString()]]);
 
         this.use();
 

@@ -19,6 +19,7 @@ export class SDFMaker {
     #outputHeight = 1;
     #shader = null;
     #shaderRadius = -1;
+    #shaderSamples = -1;
     #target = new Target();
     #inputTexture = gl.createTexture();
     #loaded = false;
@@ -106,8 +107,8 @@ export class SDFMaker {
 
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     }
 
     #loadImage(name, image) {
@@ -177,7 +178,7 @@ export class SDFMaker {
 
     #updateShader() {
         this.#shader?.free();
-        this.#shader = new ShaderSDF(this.#shaderRadius);
+        this.#shader = new ShaderSDF(this.#shaderRadius, this.#shaderSamples);
     }
 
     #makeCanvas(width, height, pixels) {
@@ -199,12 +200,14 @@ export class SDFMaker {
         if (!this.#loaded)
             return;
 
-        const kernelRadius = Math.max(
-            Math.ceil(this.#radius * (this.#inputWidth / this.#outputWidth)),
-            Math.ceil(this.#radius * (this.#inputHeight / this.#outputHeight)));
+        const samples = Math.max(
+            Math.ceil((this.#inputWidth / this.#outputWidth)),
+            Math.ceil((this.#inputHeight / this.#outputHeight)));
+        const kernelRadius = this.#radius * samples;
 
-        if (this.#shaderRadius !== kernelRadius) {
+        if (this.#shaderRadius !== kernelRadius || this.#shaderSamples !== samples) {
             this.#shaderRadius = kernelRadius;
+            this.#shaderSamples = samples;
 
             this.#updateShader();
         }
