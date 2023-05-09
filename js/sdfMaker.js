@@ -1,4 +1,5 @@
 import {ShaderSDF} from "./gl/shaderSDF.js";
+import {Target} from "./gl/target.js";
 
 export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
@@ -16,6 +17,7 @@ export class SDFMaker {
     #outputHeight = 1;
     #shader = null;
     #shaderRadius = -1;
+    #target = new Target();
 
     constructor(
         inputTarget,
@@ -170,5 +172,8 @@ export class SDFMaker {
 
             this.#updateShader();
         }
+
+        if (this.#outputWidth !== this.#target.width || this.#outputHeight !== this.#target.height)
+            this.#target.setSize(this.#outputWidth, this.#outputHeight);
     }
 }
