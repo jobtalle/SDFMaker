@@ -53,15 +53,17 @@ export class ShaderSDF extends Shader {
 
             for (int y = -RADIUS; y <= RADIUS; ++y) {
                 for (int x = -RADIUS; x <= RADIUS; ++x) {
-                    if (base != step(threshold, texelFetch(source, clamp(pixel + ivec2(x, y), ivec2(0), ivec2(size) - 1), 0).a)) {
+                    ivec2 fetchLocation = clamp(pixel + ivec2(x, y), ivec2(0), ivec2(size) - 1);
+                    
+                    if (base != step(threshold, texelFetch(source, fetchLocation, 0).a)) {
                         nearest = min(nearest, x * x + y * y);
-                        colorPixel = ivec2(x, y);
+                        colorPixel = fetchLocation;
                     }
                 }
             }
 
             outColor = vec4(
-                averageColor(ivec2(vUv * size), pixel + colorPixel),
+                averageColor(ivec2(vUv * size), colorPixel),
                 .5 * (base * 2. - 1.) * sqrt(float(nearest)) / float(RADIUS) + .5);
         }
     `;

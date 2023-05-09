@@ -230,6 +230,7 @@ export class SDFMaker {
             this.#updateShader();
         }
 
+        this.#shader.use();
         this.#shader.setSize(this.#inputWidth, this.#inputHeight);
         this.#shader.setThreshold(this.#threshold);
 

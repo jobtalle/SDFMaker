@@ -2,6 +2,7 @@
     --dark: #27292c;
     --bright: #eeeeee;
     --link: #de5840;
+    --background: #3d4549;
 }
 
 body {
@@ -64,7 +65,7 @@ button {
 
 #input-target {
     transition: .1s;
-    border: 1px solid var(--bright);
+    background-color: var(--background);
 }
 
 #input-target.hover {
@@ -89,13 +90,15 @@ button {
 }
 
 #output-container {
+    min-width: 100%;
     max-width: 500px;
-    max-height: 300px;
     overflow: auto;
     margin-left: auto;
     margin-right: auto;
 }
 
 #output-container canvas {
-    background-color: var(--bright);
+    background-color: var(--background);
+    width: 100%;
+    image-rendering: pixelated;
 }
