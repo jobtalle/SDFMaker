@@ -105,6 +105,8 @@ export class SDFMaker {
                 this.#threshold = Math.min(
                     settingThreshold.max,
                     Math.max(settingThreshold.min, parseFloat(settingThreshold.value)));
+
+            settingThreshold.value = this.#threshold;
         };
 
         buttonGenerate.onclick = this.#generate.bind(this);
