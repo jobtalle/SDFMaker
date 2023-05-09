@@ -1,5 +1,6 @@
 import {ShaderSDF} from "./gl/shaderSDF.js";
 import {Target} from "./gl/target.js";
+import {gl} from "./gl/gl.js";
 
 export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
@@ -173,7 +174,13 @@ export class SDFMaker {
             this.#updateShader();
         }
 
+        this.#shader.setSize(this.#inputWidth, this.#inputHeight);
+
         if (this.#outputWidth !== this.#target.width || this.#outputHeight !== this.#target.height)
             this.#target.setSize(this.#outputWidth, this.#outputHeight);
+
+        this.#target.bind();
+
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
 }

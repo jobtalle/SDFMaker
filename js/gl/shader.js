@@ -51,10 +51,6 @@ export class Shader {
         return gl.getUniformLocation(this.#program, name);
     }
 
-    bindUniformBlock(name, binding) {
-        gl.uniformBlockBinding(this.#program, gl.getUniformBlockIndex(this.#program, name), binding);
-    }
-
     use() {
         gl.useProgram(this.#program);
     }

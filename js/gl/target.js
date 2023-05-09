@@ -37,4 +37,9 @@ export class Target {
             width,
             height);
     }
+
+    bind() {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.#fbo);
+        gl.viewport(0, 0, this.width, this.height);
+    }
 }
