@@ -23,7 +23,7 @@ export class ShaderSDF extends Shader {
 
         out vec4 outColor;
         
-        vec3 averageColor(const ivec2 pixel) {
+        vec3 averageColor(const ivec2 pixel, const ivec2 nearest) {
             vec3 color = vec3(0.);
             int colors = 0;
             
@@ -40,7 +40,7 @@ export class ShaderSDF extends Shader {
             }
             
             if (colors == 0)
-                return vec3(0.);
+                return texelFetch(source, nearest, 0).rgb;
             
             return color / float(colors);
         }
@@ -60,11 +60,8 @@ export class ShaderSDF extends Shader {
                 }
             }
 
-            if (base == 1.)
-                colorPixel = ivec2(0);
-
             outColor = vec4(
-                averageColor(ivec2(vUv * size)),
+                averageColor(ivec2(vUv * size), pixel + colorPixel),
                 .5 * (base * 2. - 1.) * sqrt(float(nearest)) / float(RADIUS) + .5);
         }
     `;
