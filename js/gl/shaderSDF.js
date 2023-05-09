@@ -53,7 +53,7 @@ export class ShaderSDF extends Shader {
 
             for (int y = -RADIUS; y <= RADIUS; ++y) {
                 for (int x = -RADIUS; x <= RADIUS; ++x) {
-                    if (base != step(threshold, texelFetch(source, pixel + ivec2(x, y), 0).a)) {
+                    if (base != step(threshold, texelFetch(source, clamp(pixel + ivec2(x, y), ivec2(0), ivec2(size) - 1), 0).a)) {
                         nearest = min(nearest, x * x + y * y);
                         colorPixel = ivec2(x, y);
                     }
