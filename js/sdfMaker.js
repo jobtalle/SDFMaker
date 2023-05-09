@@ -14,6 +14,7 @@ export class SDFMaker {
     #outputCanvas = null;
     #aspect = 1;
     #radius = 1;
+    #threshold = .5;
     #inputWidth = 1;
     #inputHeight = 1;
     #outputWidth = 1;
@@ -31,6 +32,7 @@ export class SDFMaker {
         settingWidth,
         settingHeight,
         settingRadius,
+        settingThreshold,
         outputContainer,
         buttonGenerate,
         buttonSave) {
@@ -94,6 +96,15 @@ export class SDFMaker {
                     Math.max(settingRadius.min, parseInt(settingRadius.value)));
 
             settingRadius.value = this.#radius;
+        };
+
+        settingThreshold.oninput = () => {
+            if (isNaN(settingThreshold.value))
+                this.#threshold = .5;
+            else
+                this.#threshold = Math.min(
+                    settingThreshold.max,
+                    Math.max(settingThreshold.min, parseFloat(settingThreshold.value)));
         };
 
         buttonGenerate.onclick = this.#generate.bind(this);
@@ -216,6 +227,7 @@ export class SDFMaker {
         }
 
         this.#shader.setSize(this.#inputWidth, this.#inputHeight);
+        this.#shader.setThreshold(this.#threshold);
 
         if (this.#outputWidth !== this.#target.width || this.#outputHeight !== this.#target.height)
             this.#target.setSize(this.#outputWidth, this.#outputHeight);

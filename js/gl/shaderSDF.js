@@ -78,8 +78,6 @@ export class ShaderSDF extends Shader {
 
         this.#uniformSize = this.uniformLocation("size");
         this.#uniformThreshold = this.uniformLocation("threshold");
-
-        this.setThreshold(.5);
     }
 
     setSize(width, height) {
