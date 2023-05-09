@@ -10,7 +10,8 @@ export class SDFMaker {
     #settingWidth;
     #settingHeight;
     #settingRadius;
-    #output;
+    #outputContainer;
+    #outputCanvas = null;
     #aspect = 1;
     #radius = 1;
     #inputWidth = 1;
@@ -30,8 +31,9 @@ export class SDFMaker {
         settingWidth,
         settingHeight,
         settingRadius,
-        output,
-        buttonGenerate) {
+        outputContainer,
+        buttonGenerate,
+        buttonSave) {
         inputTarget.ondrop = event => {
             event.preventDefault();
 
@@ -95,13 +97,14 @@ export class SDFMaker {
         };
 
         buttonGenerate.onclick = this.#generate.bind(this);
+        buttonSave.onclick = this.#save.bind(this);
 
         this.#inputTarget = inputTarget;
         this.#inputInfo = inputInfo;
         this.#settingWidth = settingWidth;
         this.#settingHeight = settingHeight;
         this.#settingRadius = settingRadius;
-        this.#output = output;
+        this.#outputContainer = outputContainer;
 
         gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
 
@@ -222,11 +225,21 @@ export class SDFMaker {
         gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-        while (this.#output.firstChild)
-            this.#output.removeChild(this.#output.firstChild);
+        while (this.#outputContainer.firstChild)
+            this.#outputContainer.removeChild(this.#outputContainer.firstChild);
 
-        this.#output.appendChild(this.#makeCanvas(this.#outputWidth, this.#outputHeight, this.#target.getPixels()));
+        this.#outputContainer.appendChild(this.#outputCanvas = this.#makeCanvas(this.#outputWidth, this.#outputHeight, this.#target.getPixels()));
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+
+    #save() {
+        if (this.#outputCanvas) {
+            const link = document.createElement("a");
+
+            link.href = this.#outputCanvas.toDataURL("png");
+            link.download = "image.png";
+            link.click();
+        }
     }
 }

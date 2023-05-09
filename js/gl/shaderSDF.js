@@ -46,7 +46,7 @@ export class ShaderSDF extends Shader {
         }
 
         void main() {
-            ivec2 pixel = ivec2(vUv * size + .5);
+            ivec2 pixel = ivec2(vUv * size);
             float base = step(threshold, texelFetch(source, pixel, 0).a);
             int nearest = RADIUS * RADIUS;
             ivec2 colorPixel = ivec2(0);
