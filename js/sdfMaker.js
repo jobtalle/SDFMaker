@@ -19,6 +19,8 @@ export class SDFMaker {
     #shader = null;
     #shaderRadius = -1;
     #target = new Target();
+    #inputTexture = gl.createTexture();
+    #loaded = false;
 
     constructor(
         inputTarget,
@@ -96,6 +98,13 @@ export class SDFMaker {
         this.#settingWidth = settingWidth;
         this.#settingHeight = settingHeight;
         this.#settingRadius = settingRadius;
+
+        gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     }
 
     #loadImage(name, image) {
@@ -127,6 +136,11 @@ export class SDFMaker {
             .5 * (this.#inputTarget.height - image.height * scale),
             image.width * scale,
             image.height * scale);
+
+        gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+        this.#loaded = true;
     }
 
     #onDrop(event) {
@@ -164,6 +178,9 @@ export class SDFMaker {
     }
 
     #generate() {
+        if (!this.#loaded)
+            return;
+
         const kernelRadius = Math.max(
             Math.ceil(this.#radius * (this.#inputWidth / this.#outputWidth)),
             Math.ceil(this.#radius * (this.#inputHeight / this.#outputHeight)));
@@ -181,6 +198,11 @@ export class SDFMaker {
 
         this.#target.bind();
 
+        gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        // console.log(this.#target.getPixels());
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 }
