@@ -21,12 +21,16 @@ export class Target {
         this.height = height;
 
         gl.bindTexture(gl.TEXTURE_2D, this.#texture);
-        gl.texStorage2D(
+        gl.texImage2D(
             gl.TEXTURE_2D,
-            1,
+            0,
             gl.RGBA8,
             width,
-            height);
+            height,
+            0,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            null);
         gl.bindFramebuffer(
             gl.FRAMEBUFFER,
             this.#fbo);
