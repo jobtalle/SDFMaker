@@ -25,31 +25,26 @@ export class ShaderSDF extends Shader {
         void main() {
             ivec2 pixel = ivec2(vUv * (size + .5));
             vec4 baseTexel = texelFetch(source, pixel, 0);
-            float base = round(baseTexel.a);
+            float base = step(.5, baseTexel.a);
             int nearest = RADIUS * RADIUS;
-            ivec2 nearestOffset = ivec2(0);
+            ivec2 nearestColor = ivec2(0);
             
             for (int y = -RADIUS; y <= RADIUS; ++y) {
                 for (int x = -RADIUS; x <= RADIUS; ++x) {
                     vec4 currentPixel = texelFetch(source, pixel + ivec2(x, y), 0);
                     
-                    if (base != currentPixel.a) {
+                    if (base != step(.5, currentPixel.a)) {
                         nearest = min(nearest, x * x + y * y);
-                        nearestOffset = ivec2(x, y);
+                        
+                        if (base == 0.)
+                            nearestColor = ivec2(x, y);
                     }
                 }
             }
-            
-            float alpha = .5 * (base * 2. - 1.) * sqrt(float(nearest)) / float(RADIUS) + .5;
 
-            if (baseTexel.a > .5)
-                outColor = vec4(
-                    baseTexel.rgb,
-                    alpha);
-            else
-                outColor = vec4(
-                    texelFetch(source, pixel + nearestOffset, 0).rgb,
-                    alpha);
+            outColor = vec4(
+                texture(source, vec2(pixel + nearestColor) / size).rgb,
+                .5 * (base * 2. - 1.) * sqrt(float(nearest)) / float(RADIUS) + .5);
         }
         `;
 
