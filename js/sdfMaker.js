@@ -10,6 +10,7 @@ export class SDFMaker {
     #settingWidth;
     #settingHeight;
     #settingRadius;
+    #settingThreshold;
     #outputContainer;
     #outputCanvas = null;
     #aspect = 1;
@@ -52,7 +53,7 @@ export class SDFMaker {
 
         inputTarget.ondragleave = () => inputTarget.classList.remove(SDFMaker.#INPUT_TARGET_HOVER);
 
-        settingWidth.disabled = settingHeight.disabled = settingRadius.disabled = true;
+        settingWidth.disabled = settingHeight.disabled = settingRadius.disabled = settingThreshold.disabled = true;
         settingRadius.value = this.#radius;
 
         settingWidth.oninput = () => {
@@ -99,7 +100,7 @@ export class SDFMaker {
         };
 
         settingThreshold.oninput = () => {
-            if (isNaN(settingThreshold.value))
+            if (settingThreshold.value === "" || isNaN(settingThreshold.value))
                 this.#threshold = .5;
             else
                 this.#threshold = Math.min(
@@ -117,6 +118,7 @@ export class SDFMaker {
         this.#settingWidth = settingWidth;
         this.#settingHeight = settingHeight;
         this.#settingRadius = settingRadius;
+        this.#settingThreshold = settingThreshold;
         this.#outputContainer = outputContainer;
 
         gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
@@ -128,7 +130,7 @@ export class SDFMaker {
     }
 
     #loadImage(name, image) {
-        this.#settingWidth.disabled = this.#settingHeight.disabled = this.#settingRadius.disabled = false;
+        this.#settingWidth.disabled = this.#settingHeight.disabled = this.#settingRadius.disabled = this.#settingThreshold.disabled = false;
         this.#inputInfo.innerText = `
             Name: ${name}
             Size: ${image.width} x ${image.height}

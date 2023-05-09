@@ -20,6 +20,10 @@ body a:hover {
     color: var(--link);
 }
 
+button {
+    width: 100%;
+}
+
 .panel {
     border: 1px solid var(--bright);
     padding: 8px;
@@ -34,19 +38,28 @@ body a:hover {
     text-align: center;
 }
 
-#wrapper > .panel {
+#wrapper p {
+    text-align: center;
+}
+
+#columns {
+    display: flex;
+}
+
+.column > .panel {
     margin: 4px;
 }
 
 #input {
     display: flex;
-    flex-direction: row;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    gap: 16px;
 }
 
 #input-left {
     display: flex;
     align-items: flex-end;
-    margin-right: 16px;
 }
 
 #input-target {
@@ -66,10 +79,23 @@ body a:hover {
     width: 64px;
 }
 
-#settings button {
-    width: 100%;
+#output {
+    display: flex;
+    flex-direction: column;
 }
 
-#output {
+#output button {
+    margin-top: 4px;
+}
 
+#output-container {
+    max-width: 500px;
+    max-height: 300px;
+    overflow: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#output-container canvas {
+    background-color: var(--bright);
 }

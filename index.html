@@ -9,58 +9,64 @@
 <div id="wrapper">
     <h1>~ SDF maker ~</h1>
     <p>Released <a target="_blank" href="https://github.com/jobtalle/SDFMaker">on GitHub</a> under the <a target="_blank" href="https://github.com/jobtalle/SDFMaker/blob/master/LICENSE">MIT license</a>. Made by <a target="_blank" href="https://jobtalle.com/">Job Talle</a>.</p>
-    <div id="input" class="panel">
-        <div id="input-left">
-            <div id="settings">
-                <table>
-                    <tr>
-                        <td>
-                            <label for="setting-width">Width:</label>
-                        </td>
-                        <td>
-                            <input type="number" id="setting-width" min="1" max="32768">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="setting-height">Height:</label>
-                        </td>
-                        <td>
-                            <input type="number" id="setting-height" min="1" max="32768">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="setting-radius">Radius:</label>
-                        </td>
-                        <td>
-                            <input type="number" id="setting-radius" min="1" max="256">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="setting-threshold">Threshold:</label>
-                        </td>
-                        <td>
-                            <input type="number" id="setting-threshold" min="0" max="1" step=".01" value="0.5">
-                        </td>
-                    </tr>
-                </table>
-                <button id="button-generate">Generate</button>
+    <div id="columns">
+        <div class="column">
+            <div id="input" class="panel">
+                <div id="input-left">
+                    <div id="settings">
+                        <table>
+                            <tr>
+                                <td>
+                                    <label for="setting-width">Width:</label>
+                                </td>
+                                <td>
+                                    <input type="number" id="setting-width" min="1" max="32768">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="setting-height">Height:</label>
+                                </td>
+                                <td>
+                                    <input type="number" id="setting-height" min="1" max="32768">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="setting-radius">Radius:</label>
+                                </td>
+                                <td>
+                                    <input type="number" id="setting-radius" min="1" max="256">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="setting-threshold">Threshold:</label>
+                                </td>
+                                <td>
+                                    <input type="number" id="setting-threshold" min="0" max="1" step=".01" value="0.5">
+                                </td>
+                            </tr>
+                        </table>
+                        <button id="button-generate">Generate</button>
+                    </div>
+                </div>
+                <div id="input-right">
+                    <p>Drop a .png image here:</p>
+                    <canvas id="input-target" width="256" height="256"></canvas>
+                    <div id="input-info"></div>
+                </div>
+            </div>
+            <div id="output" class="panel">
+                <div id="output-container"></div>
+                <button id="button-save">Save</button>
             </div>
         </div>
-        <div id="input-right">
-            <p>Drop a .png image here:</p>
-            <canvas id="input-target" width="256" height="256"></canvas>
-            <div id="input-info"></div>
+        <div class="column">
+            <div id="preview" class="panel">
+                <canvas id="preview-canvas" width="400" height="400"></canvas>
+            </div>
         </div>
-    </div>
-    <div id="output" class="panel">
-        <div id="output-container"></div>
-        <button id="button-save">Save</button>
-    </div>
-    <div id="preview" class="panel">
-        <canvas id="preview-canvas" width="400" height="400"></canvas>
     </div>
 </div>
 <script src="js/main.js" type="module"></script>
