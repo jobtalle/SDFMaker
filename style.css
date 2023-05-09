@@ -83,6 +83,7 @@ button {
 #output {
     display: flex;
     flex-direction: column;
+    width: 500px;
 }
 
 #output button {
@@ -90,8 +91,7 @@ button {
 }
 
 #output-container {
-    min-width: 100%;
-    max-width: 500px;
+    width: 100%;
     overflow: auto;
     margin-left: auto;
     margin-right: auto;
@@ -101,4 +101,8 @@ button {
     background-color: var(--background);
     width: 100%;
     image-rendering: pixelated;
+}
+
+#preview-canvas {
+    position: absolute;
 }
