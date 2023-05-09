@@ -10,6 +10,7 @@ export class SDFMaker {
     #settingWidth;
     #settingHeight;
     #settingRadius;
+    #output;
     #aspect = 1;
     #radius = 1;
     #inputWidth = 1;
@@ -28,6 +29,7 @@ export class SDFMaker {
         settingWidth,
         settingHeight,
         settingRadius,
+        output,
         buttonGenerate) {
         inputTarget.ondrop = event => {
             event.preventDefault();
@@ -98,6 +100,7 @@ export class SDFMaker {
         this.#settingWidth = settingWidth;
         this.#settingHeight = settingHeight;
         this.#settingRadius = settingRadius;
+        this.#output = output;
 
         gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
 
@@ -177,6 +180,21 @@ export class SDFMaker {
         this.#shader = new ShaderSDF(this.#shaderRadius);
     }
 
+    #makeCanvas(width, height, pixels) {
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        const imageData = context.createImageData(width, height);
+
+        imageData.data.set(pixels);
+
+        canvas.width = width;
+        canvas.height = height;
+
+        context.putImageData(imageData, 0, 0);
+
+        return canvas;
+    }
+
     #generate() {
         if (!this.#loaded)
             return;
@@ -201,7 +219,10 @@ export class SDFMaker {
         gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-        // console.log(this.#target.getPixels());
+        while (this.#output.firstChild)
+            this.#output.removeChild(this.#output.firstChild);
+
+        this.#output.appendChild(this.#makeCanvas(this.#outputWidth, this.#outputHeight, this.#target.getPixels()));
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
