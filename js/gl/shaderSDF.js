@@ -29,7 +29,7 @@ export class ShaderSDF extends Shader {
             
             for (int y = 0; y < SAMPLES; ++y) {
                 for (int x = 0; x < SAMPLES; ++x) {
-                    vec4 fetched = texelFetch(source, pixel + ivec2(x, y), 0);
+                    vec4 fetched = texelFetch(source, clamp(pixel + ivec2(x, y), ivec2(0), ivec2(size) - 1), 0);
                     
                     if (fetched.a != 0.) {
                         color += fetched.rgb;
@@ -49,15 +49,19 @@ export class ShaderSDF extends Shader {
             ivec2 pixel = ivec2(vUv * size);
             float base = step(threshold, texelFetch(source, pixel, 0).a);
             int nearest = RADIUS * RADIUS;
-            ivec2 colorPixel = ivec2(0);
+            ivec2 colorPixel = pixel;
 
             for (int y = -RADIUS; y <= RADIUS; ++y) {
                 for (int x = -RADIUS; x <= RADIUS; ++x) {
                     ivec2 fetchLocation = clamp(pixel + ivec2(x, y), ivec2(0), ivec2(size) - 1);
                     
                     if (base != step(threshold, texelFetch(source, fetchLocation, 0).a)) {
-                        nearest = min(nearest, x * x + y * y);
-                        colorPixel = fetchLocation;
+                        int distance = x * x + y * y;
+                        
+                        if (distance < nearest) {
+                            nearest = x * x + y * y;
+                            colorPixel = fetchLocation;
+                        }
                     }
                 }
             }
