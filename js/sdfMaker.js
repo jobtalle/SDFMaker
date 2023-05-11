@@ -6,6 +6,7 @@ export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
 
     #inputTarget;
+    #inputMessage;
     #inputInfo;
     #settingWidth;
     #settingHeight;
@@ -30,6 +31,7 @@ export class SDFMaker {
     constructor(
         inputTarget,
         inputInfo,
+        inputMessage,
         settingWidth,
         settingHeight,
         settingRadius,
@@ -115,6 +117,7 @@ export class SDFMaker {
 
         this.#inputTarget = inputTarget;
         this.#inputInfo = inputInfo;
+        this.#inputMessage = inputMessage;
         this.#settingWidth = settingWidth;
         this.#settingHeight = settingHeight;
         this.#settingRadius = settingRadius;
@@ -131,33 +134,22 @@ export class SDFMaker {
 
     #loadImage(name, image) {
         this.#settingWidth.disabled = this.#settingHeight.disabled = this.#settingRadius.disabled = this.#settingThreshold.disabled = false;
+        this.#inputMessage.style.display = "none";
         this.#inputInfo.innerText = `
             Name: ${name}
             Size: ${image.width} x ${image.height}
             `;
 
-        this.#settingWidth.value = image.width;
-        this.#settingHeight.value = image.height;
+        this.#settingWidth.value = this.#inputTarget.width = image.width;
+        this.#settingHeight.value = this.#inputTarget.height = image.height;
         this.#aspect = image.width / image.height;
         this.#inputWidth = this.#outputWidth = image.width;
         this.#inputHeight = this.#outputHeight = image.height;
 
-        const context = this.#inputTarget.getContext("2d");
-        const scale = Math.min(
-            this.#inputTarget.width / image.width,
-            this.#inputTarget.height / image.height);
-
-        context.clearRect(0, 0, this.#inputTarget.width, this.#inputTarget.height);
-        context.drawImage(
+        this.#inputTarget.getContext("2d").drawImage(
             image,
             0,
-            0,
-            image.width,
-            image.height,
-            .5 * (this.#inputTarget.width - image.width * scale),
-            .5 * (this.#inputTarget.height - image.height * scale),
-            image.width * scale,
-            image.height * scale);
+            0);
 
         gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);

@@ -3,6 +3,7 @@
     --bright: #eeeeee;
     --link: #de5840;
     --background: #3d4549;
+    --size: 500px;
 }
 
 body {
@@ -57,14 +58,25 @@ button {
 
 #input {
     display: flex;
-    flex-direction: row-reverse;
     justify-content: space-between;
     gap: 16px;
 }
 
 #input-left {
     display: flex;
+    flex-direction: column;
+    width: var(--size);
+}
+
+#input-right {
+    display: flex;
     align-items: flex-end;
+}
+
+#input-message {
+    position: absolute;
+    padding: 16px;
+    user-select: none;
 }
 
 #input-target {
@@ -87,7 +99,7 @@ button {
 #output {
     display: flex;
     flex-direction: column;
-    width: 500px;
+    width: var(--size);
 }
 
 #output button {
