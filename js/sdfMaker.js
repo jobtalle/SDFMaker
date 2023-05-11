@@ -4,6 +4,7 @@ import {gl} from "./gl/gl.js";
 
 export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
+    static #SIZE = Number.parseInt(getComputedStyle(document.body).getPropertyValue("--size"));
 
     #inputTarget;
     #inputMessage;
@@ -136,8 +137,8 @@ export class SDFMaker {
     }
 
     #resizePreview() {
-        this.#previewCanvas.width = 500;
-        this.#previewCanvas.height = Math.round(500 / this.#aspect);
+        this.#previewCanvas.width = SDFMaker.#SIZE;
+        this.#previewCanvas.height = Math.round(SDFMaker.#SIZE / this.#aspect);
     }
 
     #loadImage(name, image) {
