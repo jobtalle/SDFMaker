@@ -135,6 +135,11 @@ export class SDFMaker {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     }
 
+    #resizePreview() {
+        this.#previewCanvas.width = 500;
+        this.#previewCanvas.height = Math.round(500 / this.#aspect);
+    }
+
     #loadImage(name, image) {
         this.#settingWidth.disabled = this.#settingHeight.disabled = this.#settingRadius.disabled = this.#settingThreshold.disabled = false;
         this.#inputMessage.style.display = "none";
@@ -143,11 +148,11 @@ export class SDFMaker {
             Size: ${image.width} x ${image.height}
             `;
 
-        this.#settingWidth.value = this.#inputTarget.width = this.#previewCanvas.width = image.width;
-        this.#settingHeight.value = this.#inputTarget.height = this.#previewCanvas.height = image.height;
+        this.#settingWidth.value = this.#inputTarget.width = this.#inputWidth = this.#outputWidth = image.width;
+        this.#settingHeight.value = this.#inputTarget.height = this.#inputHeight = this.#outputHeight = image.height;
         this.#aspect = image.width / image.height;
-        this.#inputWidth = this.#outputWidth = image.width;
-        this.#inputHeight = this.#outputHeight = image.height;
+
+        this.#resizePreview();
 
         this.#inputTarget.getContext("2d").drawImage(
             image,
@@ -229,8 +234,9 @@ export class SDFMaker {
         this.#shader.setSize(this.#inputWidth, this.#inputHeight);
         this.#shader.setThreshold(this.#threshold);
 
-        if (this.#outputWidth !== this.#target.width || this.#outputHeight !== this.#target.height)
+        if (this.#outputWidth !== this.#target.width || this.#outputHeight !== this.#target.height) {
             this.#target.setSize(this.#outputWidth, this.#outputHeight);
+        }
 
         this.#target.bind();
 
