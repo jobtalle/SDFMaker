@@ -70,7 +70,8 @@ button {
 
 #input-right {
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 #input-message {
