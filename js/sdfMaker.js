@@ -8,6 +8,7 @@ export class SDFMaker {
     #inputTarget;
     #inputMessage;
     #inputInfo;
+    #previewCanvas;
     #settingWidth;
     #settingHeight;
     #settingRadius;
@@ -32,6 +33,7 @@ export class SDFMaker {
         inputTarget,
         inputInfo,
         inputMessage,
+        previewCanvas,
         settingWidth,
         settingHeight,
         settingRadius,
@@ -118,6 +120,7 @@ export class SDFMaker {
         this.#inputTarget = inputTarget;
         this.#inputInfo = inputInfo;
         this.#inputMessage = inputMessage;
+        this.#previewCanvas = previewCanvas;
         this.#settingWidth = settingWidth;
         this.#settingHeight = settingHeight;
         this.#settingRadius = settingRadius;
@@ -140,8 +143,8 @@ export class SDFMaker {
             Size: ${image.width} x ${image.height}
             `;
 
-        this.#settingWidth.value = this.#inputTarget.width = image.width;
-        this.#settingHeight.value = this.#inputTarget.height = image.height;
+        this.#settingWidth.value = this.#inputTarget.width = this.#previewCanvas.width = image.width;
+        this.#settingHeight.value = this.#inputTarget.height = this.#previewCanvas.height = image.height;
         this.#aspect = image.width / image.height;
         this.#inputWidth = this.#outputWidth = image.width;
         this.#inputHeight = this.#outputHeight = image.height;

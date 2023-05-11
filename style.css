@@ -80,6 +80,12 @@ button {
     user-select: none;
 }
 
+#preview-canvas {
+    position: absolute;
+    pointer-events: none;
+    width: var(--size);
+}
+
 #input-target {
     transition: .1s;
     background-color: var(--background);
@@ -118,8 +124,4 @@ button {
     background-color: var(--background);
     width: 100%;
     image-rendering: pixelated;
-}
-
-#preview-canvas {
-    position: absolute;
 }
