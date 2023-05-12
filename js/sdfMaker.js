@@ -66,6 +66,7 @@ export class SDFMaker {
                 this.#outputWidth = 1;
             else
                 this.#outputWidth = Math.min(
+                    this.#inputWidth,
                     settingWidth.max,
                     Math.max(settingWidth.min, parseInt(settingWidth.value)));
 
@@ -82,6 +83,7 @@ export class SDFMaker {
                 this.#outputHeight = 1;
             else
                 this.#outputHeight = Math.min(
+                    this.#inputHeight,
                     settingHeight.max,
                     Math.max(settingHeight.min, parseInt(settingHeight.value)));
 
