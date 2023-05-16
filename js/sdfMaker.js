@@ -28,6 +28,11 @@ export class SDFMaker {
     #shaderSamples = -1;
     #target = new Target();
     #inputTexture = gl.createTexture();
+    #atlas = [
+        gl.createTexture(),
+        gl.createTexture()
+    ];
+    #atlasIndex = 0;
     #loaded = false;
 
     constructor(
@@ -130,12 +135,14 @@ export class SDFMaker {
         this.#settingThreshold = settingThreshold;
         this.#outputContainer = outputContainer;
 
-        gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
+        for (const texture of [this.#inputTexture, ...this.#atlas]) {
+            gl.bindTexture(gl.TEXTURE_2D, texture);
 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        }
     }
 
     #resizePreview() {
@@ -164,6 +171,11 @@ export class SDFMaker {
 
         gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+        for (let layer = 0; layer < 2; ++layer) {
+            gl.bindTexture(gl.TEXTURE_2D, this.#atlas[layer]);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32UI, this.#inputWidth, this.#inputHeight, 0, gl.RED_INTEGER, gl.UNSIGNED_INT, null);
+        }
 
         this.#loaded = true;
     }
