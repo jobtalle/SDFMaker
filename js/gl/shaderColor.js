@@ -7,15 +7,22 @@ export class ShaderColor extends Shader {
     static #SHADER_FRAGMENT = ShaderJFA.SHADER_PACK + `
         uniform highp usampler2D atlas;
         uniform sampler2D source;
+        uniform uvec2 size;
         
         in vec2 vUv;
         
         out vec4 color;
         
         void main() {
-            color = texture(source, vUv);
+            uvec2 nearest;
+
+            jfaUnpack(texelFetch(atlas, ivec2(gl_FragCoord.xy), 0).g, nearest);
+
+            color = texelFetch(source, ivec2(nearest), 0);
         }
         `;
+
+    #uniformSize;
 
     constructor() {
         super(ShaderColor.#SHADER_FRAGMENT);
@@ -24,5 +31,11 @@ export class ShaderColor extends Shader {
 
         gl.uniform1i(this.uniformLocation("atlas"), 0);
         gl.uniform1i(this.uniformLocation("source"), 1);
+
+        this.#uniformSize = this.uniformLocation("size");
+    }
+
+    setSize(width, height) {
+        gl.uniform2ui(this.#uniformSize, width, height);
     }
 }

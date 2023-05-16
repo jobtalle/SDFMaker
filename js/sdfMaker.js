@@ -271,6 +271,7 @@ export class SDFMaker {
         gl.bindTexture(gl.TEXTURE_2D, this.#atlas[this.#atlasIndex].texture);
 
         this.#shaderColor.use();
+        this.#shaderColor.setSize(this.#inputWidth, this.#inputHeight);
 
         this.#targetColor.bind();
 
