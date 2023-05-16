@@ -15,16 +15,16 @@ export class ShaderSDF extends Shader {
 
         void main() {
             uint x, y;
-            bool transparent;
-            uvec2 atlasPixels = uvec2(texelFetch(atlas, ivec2(vUv * vec2(size) + .5), 0).rg);
+            ivec2 atlasCoordinate = ivec2(vUv * vec2(size) + .5);
+            uvec2 atlasPixels = texelFetch(atlas, atlasCoordinate, 0).rg;
 
-            jfaUnpack(atlasPixels.x, x, y, transparent);
+            jfaUnpack(atlasPixels.x, x, y);
             
             uint x2, y2;
             
             jfaUnpack(atlasPixels.y, x2, y2);
             
-            if (texelFetch(source, ivec2(vUv * vec2(size) + .5), 0).a < .5)
+            if (texelFetch(source, atlasCoordinate, 0).a > .5)
                 color = vec4(texelFetch(source, ivec2(x, y), 0).rgb, 1.);
             else
                 color = vec4(texelFetch(source, ivec2(x2, y2), 0).rgb, 1.);

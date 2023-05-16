@@ -13,11 +13,17 @@ export class ShaderSeed extends Shader {
         out highp uvec2 coordinate;
         
         void main() {
+            bool transparent = texelFetch(source, ivec2(gl_FragCoord.xy), 0).a < threshold;
+            
             coordinate = uvec2(
                 jfaPack(
                     uint(gl_FragCoord.x),
                     uint(gl_FragCoord.y),
-                    texelFetch(source, ivec2(gl_FragCoord.xy), 0).a < threshold));
+                    transparent),
+                jfaPack(
+                    uint(gl_FragCoord.x),
+                    uint(gl_FragCoord.y),
+                    !transparent));
         }
         `;
 
