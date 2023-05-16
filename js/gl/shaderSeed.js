@@ -10,13 +10,14 @@ export class ShaderSeed extends Shader {
         
         in vec2 vUv;
         
-        out highp uint coordinate;
+        out highp uvec2 coordinate;
         
         void main() {
-            coordinate = jfaPack(
-                uint(gl_FragCoord.x),
-                uint(gl_FragCoord.y),
-                texelFetch(source, ivec2(gl_FragCoord.xy), 0).a < threshold);
+            coordinate = uvec2(
+                jfaPack(
+                    uint(gl_FragCoord.x),
+                    uint(gl_FragCoord.y),
+                    texelFetch(source, ivec2(gl_FragCoord.xy), 0).a < threshold));
         }
         `;
 

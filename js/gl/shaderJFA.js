@@ -21,51 +21,65 @@ export class ShaderJFA extends Shader {
             y = packed >> 15u & mask;
             transparent = (packed & transparentBit) == transparentBit;
         }
+        
+        void jfaUnpack(const uint packed, out uint x, out uint y) {
+            const uint mask = (1u << 15u) - 1u;
+        
+            x = packed & mask;
+            y = packed >> 15u & mask;
+        }
         `;
 
         // language=GLSL
     static #SHADER_FRAGMENT = ShaderJFA.SHADER_PACK + `
-        uniform highp usampler2D source;        
+        uniform highp usampler2D source;
         uniform uint step;
         uniform uvec2 size;
-        
+
         in vec2 vUv;
 
-        out highp uint coordinate;
-        
+        out highp uvec2 coordinate;
+
         void main() {
-            uint pixel, pixelX, pixelY, distance;
+            uvec2 distance;
+            uvec2 pixel;
+            uvec4 pixelCoordinate;
             bool transparent;
-            ivec2 delta;
+            ivec4 delta;
             ivec2 center = ivec2(gl_FragCoord.xy);
-            uint bestDistance = 0xFFFFFFFFu;
-            uint bestCoordinate = 0xFFFFFFFFu;
-            bool centerTransparent;
-            
-            jfaUnpack(uint(texelFetch(source, center, 0).r), pixelX, pixelY, centerTransparent);
-            
+            uvec2 bestDistance = uvec2(0xFFFFFFFFu);
+            uvec2 bestCoordinates = uvec2(0xFFFFFFFFu, 0u);
+
             for (int y = -1; y < 2; ++y) for (int x = -1; x < 2; ++x) {
-                pixel = uint(texelFetch(source, clamp(center + ivec2(x, y) * int(step), ivec2(0), ivec2(size) - 1), 0).r);
+                pixel = uvec2(texelFetch(source, clamp(center + ivec2(x, y) * int(step), ivec2(0), ivec2(size) - 1), 0).rg);
 
-                jfaUnpack(pixel, pixelX, pixelY, transparent);
+                jfaUnpack(pixel.x, pixelCoordinate.x, pixelCoordinate.y, transparent);
+                jfaUnpack(pixel.y, pixelCoordinate.z, pixelCoordinate.w);
 
-                delta = ivec2(pixelX, pixelY) - center;
-                distance = uint(delta.x * delta.x + delta.y * delta.y);
+                delta = ivec4(
+                    ivec2(pixelCoordinate.x, pixelCoordinate.y),
+                    ivec2(pixelCoordinate.z, pixelCoordinate.w)) - ivec4(center, center);
+                distance = uvec2(
+                    delta.x * delta.x + delta.y * delta.y,
+                    delta.z * delta.z + delta.w * delta.w);
 
                 if (transparent) {
-                    
+                    if (distance.y < bestDistance.y) {
+                        bestDistance.y = distance.y;
+                        bestCoordinates.y = pixel.y;
+                    }
                 }
                 else {
-                    if (distance < bestDistance) {
-                        bestDistance = distance;
-                        bestCoordinate = pixel;
+                    if (distance.x < bestDistance.x) {
+                        bestDistance.x = distance.x;
+                        bestCoordinates.x = pixel.x;
                     }
                 }
             }
 
-            coordinate = bestCoordinate;
+            coordinate = bestCoordinates;
         }
-        `;
+    `;
 
     #uniformStep;
     #uniformSize;
