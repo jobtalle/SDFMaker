@@ -3,6 +3,7 @@ import {Target} from "./gl/target.js";
 import {gl} from "./gl/gl.js";
 import {ShaderSeed} from "./gl/shaderSeed.js";
 import {ShaderJFA} from "./gl/shaderJFA.js";
+import {ShaderColor} from "./gl/shaderColor.js";
 
 export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
@@ -28,11 +29,11 @@ export class SDFMaker {
 
     #shaderSeed = new ShaderSeed();
     #shaderJFA = new ShaderJFA();
-    #shaderSDF = null;
-    #shaderRadius = -1;
-    #shaderSamples = -1;
+    #shaderColor = new ShaderColor();
+    #shaderSDF = new ShaderSDF();
 
-    #target = new Target();
+    #targetColor = new Target();
+    #targetComposite = new Target();
     #inputTexture = gl.createTexture();
     #atlas = [
         new Target(gl.RG32UI, gl.RG_INTEGER, gl.UNSIGNED_INT),
@@ -207,11 +208,6 @@ export class SDFMaker {
         }
     }
 
-    #updateShader() {
-        this.#shaderSDF?.free();
-        this.#shaderSDF = new ShaderSDF(this.#shaderRadius, this.#shaderSamples);
-    }
-
     #makeCanvas(width, height, pixels) {
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
@@ -235,7 +231,8 @@ export class SDFMaker {
         for (let layer = 0; layer < 2; ++layer)
             this.#atlas[layer].setSize(this.#inputWidth, this.#inputHeight);
 
-        this.#target.setSize(this.#outputWidth, this.#outputHeight);
+        this.#targetColor.setSize(this.#inputWidth, this.#inputHeight);
+        this.#targetComposite.setSize(this.#outputWidth, this.#outputHeight);
 
         // Bind source texture
         gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
@@ -267,19 +264,24 @@ export class SDFMaker {
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
 
-        // Convert JFA to SDF
-        this.#updateShader();
-
-        this.#shaderSDF.use();
-        this.#shaderSDF.setSize(this.#inputWidth, this.#inputHeight);
-        this.#shaderSDF.setRadius(2 * this.#inputWidth / this.#outputWidth);
-
-        this.#target.bind();
-
+        // Make color texture
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.#atlas[this.#atlasIndex].texture);
+
+        this.#shaderColor.use();
+
+        this.#targetColor.bind();
+
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        // Convert JFA to SDF
+        this.#shaderSDF.use();
+        this.#shaderSDF.setSize(this.#inputWidth, this.#inputHeight);
+        this.#shaderSDF.setRadius(2 * this.#radius * this.#inputWidth / this.#outputWidth);
+
+        this.#targetComposite.bind();
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
