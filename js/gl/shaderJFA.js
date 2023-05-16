@@ -15,15 +15,16 @@ export class ShaderJFA extends Shader {
             return coordinates;
         }
 
-        void jfaUnpack(const uint packed, out uint x, out uint y) {
+        void jfaUnpack(const uint packed, out uvec2 unpacked) {
             const uint mask = (1u << 15u) - 1u;
 
-            x = packed & mask;
-            y = packed >> 15u & mask;
+            unpacked = uvec2(
+                packed & mask,
+                packed >> 15u & mask);
         }
 
-        void jfaUnpack(const uint packed, out uint x, out uint y, out bool marked) {
-            jfaUnpack(packed, x, y);
+        void jfaUnpack(const uint packed, out uvec2 unpacked, out bool marked) {
+            jfaUnpack(packed, unpacked);
 
             marked = (packed & jfaMarkedBit) == jfaMarkedBit;
         }
@@ -52,8 +53,8 @@ export class ShaderJFA extends Shader {
             for (int y = -1; y < 2; ++y) for (int x = -1; x < 2; ++x) {
                 pixels = texelFetch(source, clamp(center + ivec2(x, y) * int(step), ivec2(0), ivec2(size) - 1), 0).rg;
 
-                jfaUnpack(pixels.x, pixelCoordinates.x, pixelCoordinates.y, markedOut);
-                jfaUnpack(pixels.y, pixelCoordinates.z, pixelCoordinates.w, markedIn);
+                jfaUnpack(pixels.x, pixelCoordinates.xy, markedOut);
+                jfaUnpack(pixels.y, pixelCoordinates.zw, markedIn);
 
                 deltas = ivec4(
                     ivec2(pixelCoordinates.x, pixelCoordinates.y),

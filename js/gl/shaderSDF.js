@@ -8,32 +8,33 @@ export class ShaderSDF extends Shader {
         uniform highp usampler2D atlas;
         uniform sampler2D source;
         uniform uvec2 size;
+        uniform float radius;
         
         in vec2 vUv;
 
         out vec4 color;
 
         void main() {
-            uint x, y;
+            uvec2 nearestIn, nearestOut;
             ivec2 atlasCoordinate = ivec2(vUv * vec2(size) + .5);
             uvec2 atlasPixels = texelFetch(atlas, atlasCoordinate, 0).rg;
 
-            jfaUnpack(atlasPixels.x, x, y);
+            jfaUnpack(atlasPixels.x, nearestIn);
+            jfaUnpack(atlasPixels.y, nearestOut);
             
-            uint x2, y2;
-            
-            jfaUnpack(atlasPixels.y, x2, y2);
+            vec3 sourceColor = texture(source, vUv).rgb;
             
             if (texelFetch(source, atlasCoordinate, 0).a > .5)
-                color = vec4(texelFetch(source, ivec2(x, y), 0).rgb, 1.);
+                color = vec4(sourceColor, min(1., .5 + length(vec2(atlasCoordinate - ivec2(nearestIn))) / radius));
             else
-                color = vec4(texelFetch(source, ivec2(x2, y2), 0).rgb, 1.);
+                color = vec4(sourceColor, max(0., .5 - length(vec2(atlasCoordinate - ivec2(nearestOut))) / radius));
         }
     `;
 
     #uniformSize;
+    #uniformRadius;
 
-    constructor(radius, samples) {
+    constructor() {
         super(ShaderSDF.#SHADER_FRAGMENT);
 
         this.use();
@@ -42,9 +43,14 @@ export class ShaderSDF extends Shader {
         gl.uniform1i(this.uniformLocation("source"), 1);
 
         this.#uniformSize = this.uniformLocation("size");
+        this.#uniformRadius = this.uniformLocation("radius");
     }
 
     setSize(width, height) {
         gl.uniform2ui(this.#uniformSize, width, height);
+    }
+
+    setRadius(radius) {
+        gl.uniform1f(this.#uniformRadius, radius);
     }
 }

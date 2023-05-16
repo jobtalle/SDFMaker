@@ -272,6 +272,7 @@ export class SDFMaker {
 
         this.#shaderSDF.use();
         this.#shaderSDF.setSize(this.#inputWidth, this.#inputHeight);
+        this.#shaderSDF.setRadius(2 * this.#inputWidth / this.#outputWidth);
 
         this.#target.bind();
 
