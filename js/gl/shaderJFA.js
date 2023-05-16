@@ -38,46 +38,46 @@ export class ShaderJFA extends Shader {
 
         in vec2 vUv;
 
-        out highp uvec2 coordinate;
+        out highp uvec2 coordinates;
 
         void main() {
-            uvec2 distance;
-            uvec2 pixel;
-            uvec4 pixelCoordinate;
+            uvec2 distances;
+            uvec2 pixels;
+            uvec4 pixelCoordinates;
             bool transparent;
-            ivec4 delta;
+            ivec4 deltas;
             ivec2 center = ivec2(gl_FragCoord.xy);
-            uvec2 bestDistance = uvec2(0xFFFFFFFFu);
+            uvec2 bestDistances = uvec2(0xFFFFFFFFu);
             uvec2 bestCoordinates = uvec2(0xFFFFFFFFu, 0u);
 
             for (int y = -1; y < 2; ++y) for (int x = -1; x < 2; ++x) {
-                pixel = uvec2(texelFetch(source, clamp(center + ivec2(x, y) * int(step), ivec2(0), ivec2(size) - 1), 0).rg);
+                pixels = uvec2(texelFetch(source, clamp(center + ivec2(x, y) * int(step), ivec2(0), ivec2(size) - 1), 0).rg);
 
-                jfaUnpack(pixel.x, pixelCoordinate.x, pixelCoordinate.y, transparent);
-                jfaUnpack(pixel.y, pixelCoordinate.z, pixelCoordinate.w);
+                jfaUnpack(pixels.x, pixelCoordinates.x, pixelCoordinates.y, transparent);
+                jfaUnpack(pixels.y, pixelCoordinates.z, pixelCoordinates.w);
 
-                delta = ivec4(
-                    ivec2(pixelCoordinate.x, pixelCoordinate.y),
-                    ivec2(pixelCoordinate.z, pixelCoordinate.w)) - ivec4(center, center);
-                distance = uvec2(
-                    delta.x * delta.x + delta.y * delta.y,
-                    delta.z * delta.z + delta.w * delta.w);
+                deltas = ivec4(
+                ivec2(pixelCoordinates.x, pixelCoordinates.y),
+                ivec2(pixelCoordinates.z, pixelCoordinates.w)) - ivec4(center, center);
+                distances = uvec2(
+                deltas.x * deltas.x + deltas.y * deltas.y,
+                deltas.z * deltas.z + deltas.w * deltas.w);
 
                 if (transparent) {
-                    if (distance.y < bestDistance.y) {
-                        bestDistance.y = distance.y;
-                        bestCoordinates.y = pixel.y;
+                    if (distances.y < bestDistances.y) {
+                        bestDistances.y = distances.y;
+                        bestCoordinates.y = pixels.y;
                     }
                 }
                 else {
-                    if (distance.x < bestDistance.x) {
-                        bestDistance.x = distance.x;
-                        bestCoordinates.x = pixel.x;
+                    if (distances.x < bestDistances.x) {
+                        bestDistances.x = distances.x;
+                        bestCoordinates.x = pixels.x;
                     }
                 }
             }
 
-            coordinate = bestCoordinates;
+            coordinates = bestCoordinates;
         }
     `;
 
