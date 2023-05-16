@@ -3,10 +3,10 @@ import {gl} from "./gl.js";
 
 export class ShaderJFA extends Shader {
     static SHADER_PACK = `
-        const uint transparentBit = 1u << 26u;
+        const uint transparentBit = 1u << 31u;
 
         uint jfaPack(const uint x, const uint y, const bool transparent) {
-            uint coordinates = x | (y << 13u);
+            uint coordinates = x | (y << 15u);
             
             if (transparent)
                 return coordinates | transparentBit;
@@ -15,11 +15,10 @@ export class ShaderJFA extends Shader {
         }
         
         void jfaUnpack(const uint packed, out uint x, out uint y, out bool transparent) {
-            const uint maskX = (1u << 13u) - 1u;
-            const uint maskY = maskX << 13u;
+            const uint mask = (1u << 15u) - 1u;
         
-            x = packed & maskX;
-            y = (packed & maskY) >> 13u;
+            x = packed & mask;
+            y = packed >> 15u & mask;
             transparent = (packed & transparentBit) == transparentBit;
         }
         `;
