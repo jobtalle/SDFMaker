@@ -35,8 +35,8 @@ export class SDFMaker {
     #target = new Target();
     #inputTexture = gl.createTexture();
     #atlas = [
-        new Target(gl.R32UI, gl.RED_INTEGER, gl.UNSIGNED_INT),
-        new Target(gl.R32UI, gl.RED_INTEGER, gl.UNSIGNED_INT)];
+        new Target(gl.RG32UI, gl.RG_INTEGER, gl.UNSIGNED_INT),
+        new Target(gl.RG32UI, gl.RG_INTEGER, gl.UNSIGNED_INT)];
     #atlasIndex = 0;
     #loaded = false;
 
