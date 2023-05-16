@@ -20,10 +20,10 @@ export class ShaderSDF extends Shader {
 
             jfaUnpack(atlasPixel, x, y, transparent);
             
-            color = texelFetch(source, ivec2(x, y), 0);
-            
-            if (transparent)
-                color = vec4(1.);
+            if (texelFetch(source, ivec2(vUv * vec2(size) + .5), 0).a < .5)
+                color = vec4(texelFetch(source, ivec2(x, y), 0).rgb, 1.);
+            else
+                color = vec4(texelFetch(source, ivec2(vUv * vec2(size) + .5), 0).rgb, 1.);
         }
     `;
 

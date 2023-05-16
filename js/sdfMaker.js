@@ -2,6 +2,7 @@ import {ShaderSDF} from "./gl/shaderSDF.js";
 import {Target} from "./gl/target.js";
 import {gl} from "./gl/gl.js";
 import {ShaderSeed} from "./gl/shaderSeed.js";
+import {ShaderJFA} from "./gl/shaderJFA.js";
 
 export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
@@ -26,6 +27,7 @@ export class SDFMaker {
     #outputHeight = 1;
 
     #shaderSeed = new ShaderSeed();
+    #shaderJFA = new ShaderJFA();
     #shaderSDF = null;
     #shaderRadius = -1;
     #shaderSamples = -1;
@@ -246,14 +248,19 @@ export class SDFMaker {
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-        // const pixels2 = new Uint32Array(this.#inputWidth * this.#inputHeight);
-        //
-        // gl.readPixels(0, 0, this.#inputWidth, this.#inputHeight, gl.RED_INTEGER, gl.UNSIGNED_INT, pixels2);
-        //
-        // console.log(pixels2);
-
         // Apply JFA
-        // TODO
+        this.#shaderJFA.use();
+        this.#shaderJFA.setSize(this.#inputWidth, this.#inputHeight);
+
+        for (let step = Math.ceil(Math.log2(Math.max(this.#inputWidth, this.#inputHeight))); step-- > 0;) {
+            this.#shaderJFA.setStep(1 << step);
+
+            gl.bindTexture(gl.TEXTURE_2D, this.#atlas[this.#atlasIndex].texture);
+
+            this.#atlas[this.#atlasIndex = 1 - this.#atlasIndex].bind();
+
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
 
         // Convert JFA to SDF
         this.#updateShader();
