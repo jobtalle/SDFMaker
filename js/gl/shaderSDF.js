@@ -7,6 +7,7 @@ export class ShaderSDF extends Shader {
     static #SHADER_FRAGMENT = ShaderJFA.SHADER_PACK + `
         uniform highp usampler2D atlas;
         uniform sampler2D source;
+        uniform sampler2D sourceColor;
         uniform uvec2 size;
         uniform float radius;
         
@@ -22,7 +23,7 @@ export class ShaderSDF extends Shader {
             jfaUnpack(atlasPixels.x, nearestIn);
             jfaUnpack(atlasPixels.y, nearestOut);
             
-            vec3 sourceColor = texture(source, vUv).rgb;
+            vec3 sourceColor = texture(sourceColor, vUv).rgb;
             
             if (texelFetch(source, atlasCoordinate, 0).a > .5)
                 color = vec4(sourceColor, min(1., .5 + length(vec2(atlasCoordinate - ivec2(nearestIn))) / radius));
@@ -41,6 +42,7 @@ export class ShaderSDF extends Shader {
 
         gl.uniform1i(this.uniformLocation("atlas"), 0);
         gl.uniform1i(this.uniformLocation("source"), 1);
+        gl.uniform1i(this.uniformLocation("sourceColor"), 2);
 
         this.#uniformSize = this.uniformLocation("size");
         this.#uniformRadius = this.uniformLocation("radius");

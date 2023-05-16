@@ -277,6 +277,10 @@ export class SDFMaker {
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
         // Convert JFA to SDF
+        gl.activeTexture(gl.TEXTURE2);
+        gl.bindTexture(gl.TEXTURE_2D, this.#targetColor.texture);
+        gl.activeTexture(gl.TEXTURE0);
+
         this.#shaderSDF.use();
         this.#shaderSDF.setSize(this.#inputWidth, this.#inputHeight);
         this.#shaderSDF.setRadius(2 * this.#radius * this.#inputWidth / this.#outputWidth);
