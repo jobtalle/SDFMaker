@@ -249,11 +249,16 @@ export class SDFMaker {
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
         // Apply JFA
+        const steps = [1];
+
+        for (let step = Math.ceil(Math.log2(Math.max(this.#inputWidth, this.#inputHeight))); step-- > 0;)
+            steps.push(1 << step);
+
         this.#shaderJFA.use();
         this.#shaderJFA.setSize(this.#inputWidth, this.#inputHeight);
 
-        for (let step = Math.ceil(Math.log2(Math.max(this.#inputWidth, this.#inputHeight))); step-- > 0;) {
-            this.#shaderJFA.setStep(1 << step);
+        for (let step = 0, stepCount = steps.length; step < stepCount; ++step) {
+            this.#shaderJFA.setStep(steps[step]);
 
             gl.bindTexture(gl.TEXTURE_2D, this.#atlas[this.#atlasIndex].texture);
 

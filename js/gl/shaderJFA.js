@@ -34,26 +34,35 @@ export class ShaderJFA extends Shader {
         out highp uint coordinate;
         
         void main() {
+            uint pixel, pixelX, pixelY, distance;
+            bool transparent;
+            ivec2 delta;
             ivec2 center = ivec2(gl_FragCoord.xy);
             uint bestDistance = 0xFFFFFFFFu;
-            uint bestCoordinate = transparentBit;
-
+            uint bestCoordinate = 0xFFFFFFFFu;
+            bool centerTransparent;
+            
+            jfaUnpack(uint(texelFetch(source, center, 0).r), pixelX, pixelY, centerTransparent);
+            
             for (int y = -1; y < 2; ++y) for (int x = -1; x < 2; ++x) {
-                uint pixel = uint(texelFetch(source, clamp(center + ivec2(x, y) * int(step), ivec2(0), ivec2(size) - 1), 0).r);
-                uint pixelX, pixelY;
-                bool transparent;
-                
+                pixel = uint(texelFetch(source, clamp(center + ivec2(x, y) * int(step), ivec2(0), ivec2(size) - 1), 0).r);
+
                 jfaUnpack(pixel, pixelX, pixelY, transparent);
-                
-                ivec2 delta = ivec2(pixelX, pixelY) - center;
-                uint distance = uint(delta.x * delta.x + delta.y * delta.y);
-                
-                if (!transparent && distance < bestDistance) {
-                    bestDistance = distance;
-                    bestCoordinate = pixel;
+
+                delta = ivec2(pixelX, pixelY) - center;
+                distance = uint(delta.x * delta.x + delta.y * delta.y);
+
+                if (transparent) {
+                    
+                }
+                else {
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        bestCoordinate = pixel;
+                    }
                 }
             }
-            
+
             coordinate = bestCoordinate;
         }
         `;
