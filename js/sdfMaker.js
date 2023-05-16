@@ -1,6 +1,7 @@
 import {ShaderSDF} from "./gl/shaderSDF.js";
 import {Target} from "./gl/target.js";
 import {gl} from "./gl/gl.js";
+import {ShaderSeed} from "./gl/shaderSeed.js";
 
 export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
@@ -23,15 +24,17 @@ export class SDFMaker {
     #inputHeight = 1;
     #outputWidth = 1;
     #outputHeight = 1;
-    #shader = null;
+
+    #shaderSeed = new ShaderSeed();
+    #shaderSDF = null;
     #shaderRadius = -1;
     #shaderSamples = -1;
+
     #target = new Target();
     #inputTexture = gl.createTexture();
     #atlas = [
-        gl.createTexture(),
-        gl.createTexture()
-    ];
+        new Target(gl.R32UI, gl.RED_INTEGER, gl.UNSIGNED_INT),
+        new Target(gl.R32UI, gl.RED_INTEGER, gl.UNSIGNED_INT)];
     #atlasIndex = 0;
     #loaded = false;
 
@@ -135,14 +138,12 @@ export class SDFMaker {
         this.#settingThreshold = settingThreshold;
         this.#outputContainer = outputContainer;
 
-        for (const texture of [this.#inputTexture, ...this.#atlas]) {
-            gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
 
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        }
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     }
 
     #resizePreview() {
@@ -171,11 +172,6 @@ export class SDFMaker {
 
         gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-        for (let layer = 0; layer < 2; ++layer) {
-            gl.bindTexture(gl.TEXTURE_2D, this.#atlas[layer]);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32UI, this.#inputWidth, this.#inputHeight, 0, gl.RED_INTEGER, gl.UNSIGNED_INT, null);
-        }
 
         this.#loaded = true;
     }
@@ -210,8 +206,8 @@ export class SDFMaker {
     }
 
     #updateShader() {
-        this.#shader?.free();
-        this.#shader = new ShaderSDF(this.#shaderRadius, this.#shaderSamples);
+        this.#shaderSDF?.free();
+        this.#shaderSDF = new ShaderSDF(this.#shaderRadius, this.#shaderSamples);
     }
 
     #makeCanvas(width, height, pixels) {
@@ -233,36 +229,58 @@ export class SDFMaker {
         if (!this.#loaded)
             return;
 
-        const samples = Math.max(
-            Math.ceil((this.#inputWidth / this.#outputWidth)),
-            Math.ceil((this.#inputHeight / this.#outputHeight)));
-        const kernelRadius = this.#radius * samples;
+        // Update target sizes
+        for (let layer = 0; layer < 2; ++layer)
+            this.#atlas[layer].setSize(this.#inputWidth, this.#inputHeight);
 
-        if (this.#shaderRadius !== kernelRadius || this.#shaderSamples !== samples) {
-            this.#shaderRadius = kernelRadius;
-            this.#shaderSamples = samples;
+        this.#target.setSize(this.#outputWidth, this.#outputHeight);
 
-            this.#updateShader();
-        }
+        // Bind source texture
+        gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
 
-        this.#shader.use();
-        this.#shader.setSize(this.#inputWidth, this.#inputHeight);
-        this.#shader.setThreshold(this.#threshold);
+        // Seed JFA
+        this.#shaderSeed.use();
+        this.#shaderSeed.setThreshold(this.#threshold);
 
-        if (this.#outputWidth !== this.#target.width || this.#outputHeight !== this.#target.height) {
-            this.#target.setSize(this.#outputWidth, this.#outputHeight);
-        }
+        this.#atlas[this.#atlasIndex].bind();
+
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        // const pixels2 = new Uint32Array(this.#inputWidth * this.#inputHeight);
+        //
+        // gl.readPixels(0, 0, this.#inputWidth, this.#inputHeight, gl.RED_INTEGER, gl.UNSIGNED_INT, pixels2);
+        //
+        // console.log(pixels2);
+
+        // Apply JFA
+        // TODO
+
+        // Convert JFA to SDF
+        this.#updateShader();
+
+        this.#shaderSDF.use();
+        this.#shaderSDF.setSize(this.#inputWidth, this.#inputHeight);
 
         this.#target.bind();
 
+        gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.#atlas[this.#atlasIndex].texture);
+
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
+        // Send output to HTML
         while (this.#outputContainer.firstChild)
             this.#outputContainer.removeChild(this.#outputContainer.firstChild);
 
-        this.#outputContainer.appendChild(this.#outputCanvas = this.#makeCanvas(this.#outputWidth, this.#outputHeight, this.#target.getPixels()));
+        const pixels = new Uint8Array(this.#outputWidth * this.#outputHeight << 2);
 
+        gl.readPixels(0, 0, this.#outputWidth, this.#outputHeight, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+        this.#outputContainer.appendChild(this.#outputCanvas = this.#makeCanvas(this.#outputWidth, this.#outputHeight, pixels));
+
+        // Reset framebuffer binding
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 

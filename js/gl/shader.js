@@ -3,6 +3,17 @@ import {gl} from "./gl.js";
 export class Shader {
     static #PREFIX = "#version 300 es\nprecision highp float;\n";
 
+    // language=GLSL
+    static VERTEX_DEFAULT = `
+        out vec2 vUv;
+
+        void main() {
+            vUv = vec2(gl_VertexID & 1, (gl_VertexID >> 1) & 1);
+
+            gl_Position = vec4(vUv * 2. - 1., 0., 1.);
+        }
+        `;
+
     #program;
 
     static makeDefines(defines) {
@@ -14,7 +25,7 @@ export class Shader {
         return glsl;
     }
 
-    constructor(vertex, fragment, defines = null) {
+    constructor(fragment, vertex = Shader.VERTEX_DEFAULT, defines = null) {
         const shaderVertex = gl.createShader(gl.VERTEX_SHADER);
         const shaderFragment = gl.createShader(gl.FRAGMENT_SHADER);
         let prefix = defines ? Shader.#PREFIX + Shader.makeDefines(defines) : Shader.#PREFIX;

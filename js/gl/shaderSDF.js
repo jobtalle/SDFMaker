@@ -1,96 +1,46 @@
 import {Shader} from "./shader.js";
+import {ShaderJFA} from "./shaderJFA.js";
 import {gl} from "./gl.js";
 
 export class ShaderSDF extends Shader {
     // language=GLSL
-    static #SHADER_VERTEX = `
-        out vec2 vUv;
- 
-        void main() {
-            vUv = vec2(gl_VertexID & 1, (gl_VertexID >> 1) & 1);   
-            
-            gl_Position = vec4(vUv * 2. - 1., 0., 1.);
-        }
-        `;
-
-    // language=GLSL
-    static #SHADER_FRAGMENT = `
-        uniform vec2 size;
-        uniform float threshold;
+    static #SHADER_FRAGMENT = ShaderJFA.SHADER_PACK + `
+        uniform highp usampler2D atlas;
         uniform sampler2D source;
-
+        uniform uvec2 size;
+        
         in vec2 vUv;
 
-        out vec4 outColor;
-        
-        vec3 averageColor(const ivec2 pixel, const ivec2 nearest) {
-            vec3 color = vec3(0.);
-            int colors = 0;
-            
-            for (int y = 0; y < SAMPLES; ++y) {
-                for (int x = 0; x < SAMPLES; ++x) {
-                    vec4 fetched = texelFetch(source, clamp(pixel + ivec2(x, y), ivec2(0), ivec2(size) - 1), 0);
-                    
-                    if (fetched.a != 0.) {
-                        color += fetched.rgb;
-                        
-                        ++colors;
-                    }
-                }
-            }
-            
-            if (colors == 0)
-                return texelFetch(source, nearest, 0).rgb;
-            
-            return color / float(colors);
-        }
+        out vec4 color;
 
         void main() {
-            ivec2 pixel = ivec2(vUv * size);
-            float base = step(threshold, texelFetch(source, pixel, 0).a);
-            int nearest = RADIUS * RADIUS;
-            ivec2 colorPixel = pixel;
+            uint x, y;
+            bool transparent;
+            uint atlasPixel = uint(texelFetch(atlas, ivec2(vUv * vec2(size) + .5), 0));
 
-            for (int y = -RADIUS; y <= RADIUS; ++y) {
-                for (int x = -RADIUS; x <= RADIUS; ++x) {
-                    ivec2 fetchLocation = clamp(pixel + ivec2(x, y), ivec2(0), ivec2(size) - 1);
-                    
-                    if (base != step(threshold, texelFetch(source, fetchLocation, 0).a)) {
-                        int distance = x * x + y * y;
-                        
-                        if (distance < nearest) {
-                            nearest = x * x + y * y;
-                            colorPixel = fetchLocation;
-                        }
-                    }
-                }
-            }
-
-            outColor = vec4(
-                averageColor(ivec2(vUv * size), colorPixel),
-                .5 * (base * 2. - 1.) * sqrt(float(nearest)) / float(RADIUS) + .5);
+            jfaUnpack(atlasPixel, x, y, transparent);
+            
+            color = texelFetch(source, ivec2(x, y), 0);
+            
+            if (transparent)
+                color = vec4(1.);
         }
     `;
 
     #uniformSize;
-    #uniformThreshold;
 
     constructor(radius, samples) {
-        super(ShaderSDF.#SHADER_VERTEX, ShaderSDF.#SHADER_FRAGMENT, [
-            ["RADIUS", radius.toString()],
-            ["SAMPLES", samples.toString()]]);
+        super(ShaderSDF.#SHADER_FRAGMENT);
 
         this.use();
 
+        gl.uniform1i(this.uniformLocation("atlas"), 0);
+        gl.uniform1i(this.uniformLocation("source"), 1);
+
         this.#uniformSize = this.uniformLocation("size");
-        this.#uniformThreshold = this.uniformLocation("threshold");
     }
 
     setSize(width, height) {
-        gl.uniform2f(this.#uniformSize, width, height);
-    }
-
-    setThreshold(threshold) {
-        gl.uniform1f(this.#uniformThreshold, threshold);
+        gl.uniform2ui(this.#uniformSize, width, height);
     }
 }
