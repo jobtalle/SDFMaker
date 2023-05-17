@@ -11,14 +11,14 @@ export class ShaderColor extends Shader {
         
         in vec2 vUv;
         
-        out vec4 color;
+        out vec3 color;
         
         void main() {
             uvec2 nearest;
 
             jfaUnpack(texelFetch(atlas, ivec2(gl_FragCoord.xy), 0).g, nearest);
 
-            color = texelFetch(source, ivec2(nearest), 0);
+            color = texelFetch(source, ivec2(nearest), 0).rgb;
         }
         `;
 

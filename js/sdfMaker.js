@@ -1,9 +1,7 @@
-import {ShaderSDF} from "./gl/shaderSDF.js";
-import {Target} from "./gl/target.js";
 import {gl} from "./gl/gl.js";
-import {ShaderSeed} from "./gl/shaderSeed.js";
-import {ShaderJFA} from "./gl/shaderJFA.js";
-import {ShaderColor} from "./gl/shaderColor.js";
+import {JFA} from "./jfa.js";
+import {Color} from "./color.js";
+import {Composite} from "./composite.js";
 
 export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
@@ -27,18 +25,10 @@ export class SDFMaker {
     #outputWidth = 1;
     #outputHeight = 1;
 
-    #shaderSeed = new ShaderSeed();
-    #shaderJFA = new ShaderJFA();
-    #shaderColor = new ShaderColor();
-    #shaderSDF = new ShaderSDF();
-
-    #targetColor = new Target();
-    #targetComposite = new Target();
-    #inputTexture = gl.createTexture();
-    #atlas = [
-        new Target(gl.RG32UI, gl.RG_INTEGER, gl.UNSIGNED_INT),
-        new Target(gl.RG32UI, gl.RG_INTEGER, gl.UNSIGNED_INT)];
-    #atlasIndex = 0;
+    #input = gl.createTexture();
+    #jfa = new JFA(this.#input);
+    #color = new Color(this.#input, this.#jfa);
+    #composite = new Composite(this.#input, this.#jfa, this.#color);
     #loaded = false;
 
     constructor(
@@ -141,7 +131,7 @@ export class SDFMaker {
         this.#settingThreshold = settingThreshold;
         this.#outputContainer = outputContainer;
 
-        gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
+        gl.bindTexture(gl.TEXTURE_2D, this.#input);
 
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -173,7 +163,7 @@ export class SDFMaker {
             0,
             0);
 
-        gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
+        gl.bindTexture(gl.TEXTURE_2D, this.#input);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
         this.#loaded = true;
@@ -227,80 +217,25 @@ export class SDFMaker {
         if (!this.#loaded)
             return;
 
-        // Update target sizes
-        for (let layer = 0; layer < 2; ++layer)
-            this.#atlas[layer].setSize(this.#inputWidth, this.#inputHeight);
+        this.#jfa.setSize(this.#inputWidth, this.#inputHeight);
+        this.#color.setSize(this.#inputWidth, this.#inputHeight);
+        this.#composite.setSize(this.#outputWidth, this.#outputHeight);
 
-        this.#targetColor.setSize(this.#inputWidth, this.#inputHeight);
-        this.#targetComposite.setSize(this.#outputWidth, this.#outputHeight);
+        this.#jfa.generate(this.#threshold);
+        this.#color.generate();
+        this.#composite.generate(
+            this.#inputWidth,
+            this.#inputHeight,
+            this.#radius);
 
-        // Bind source texture
-        gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
-
-        // Seed JFA
-        this.#shaderSeed.use();
-        this.#shaderSeed.setThreshold(this.#threshold);
-
-        this.#atlas[this.#atlasIndex].bind();
-
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-        // Apply JFA
-        const steps = [1];
-
-        for (let step = Math.ceil(Math.log2(Math.max(this.#inputWidth, this.#inputHeight))); step-- > 0;)
-            steps.push(1 << step);
-
-        this.#shaderJFA.use();
-        this.#shaderJFA.setSize(this.#inputWidth, this.#inputHeight);
-
-        for (let step = 0, stepCount = steps.length; step < stepCount; ++step) {
-            this.#shaderJFA.setStep(steps[step]);
-
-            gl.bindTexture(gl.TEXTURE_2D, this.#atlas[this.#atlasIndex].texture);
-
-            this.#atlas[this.#atlasIndex = 1 - this.#atlasIndex].bind();
-
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        }
-
-        // Make color texture
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, this.#inputTexture);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.#atlas[this.#atlasIndex].texture);
-
-        this.#shaderColor.use();
-        this.#shaderColor.setSize(this.#inputWidth, this.#inputHeight);
-
-        this.#targetColor.bind();
-
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-        // Convert JFA to SDF
-        gl.activeTexture(gl.TEXTURE2);
-        gl.bindTexture(gl.TEXTURE_2D, this.#targetColor.texture);
-        gl.activeTexture(gl.TEXTURE0);
-
-        this.#shaderSDF.use();
-        this.#shaderSDF.setSize(this.#inputWidth, this.#inputHeight);
-        this.#shaderSDF.setRadius(2 * this.#radius * this.#inputWidth / this.#outputWidth);
-
-        this.#targetComposite.bind();
-
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-        // Send output to HTML
         while (this.#outputContainer.firstChild)
             this.#outputContainer.removeChild(this.#outputContainer.firstChild);
 
-        const pixels = new Uint8Array(this.#outputWidth * this.#outputHeight << 2);
+        this.#outputContainer.appendChild(this.#outputCanvas = this.#makeCanvas(
+            this.#outputWidth,
+            this.#outputHeight,
+            this.#composite.pixels));
 
-        gl.readPixels(0, 0, this.#outputWidth, this.#outputHeight, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-
-        this.#outputContainer.appendChild(this.#outputCanvas = this.#makeCanvas(this.#outputWidth, this.#outputHeight, pixels));
-
-        // Reset framebuffer binding
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
