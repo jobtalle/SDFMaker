@@ -29,8 +29,6 @@ export class ShaderSDF extends Shader {
                 color = vec4(sourceColor, min(1., .5 + length(vec2(atlasCoordinate - ivec2(nearestIn))) / radius));
             else
                 color = vec4(sourceColor, max(0., .5 - length(vec2(atlasCoordinate - ivec2(nearestOut))) / radius));
-            
-            color = vec4(sourceColor, 1.);
         }
     `;
 
