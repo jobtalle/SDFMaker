@@ -34,11 +34,11 @@ export class Composite {
 
     generate(width, height, radius) {
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.#jfa.atlas);
+        gl.bindTexture(gl.TEXTURE_2D, this.#color.texture);
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, this.#input);
         gl.activeTexture(gl.TEXTURE2);
-        gl.bindTexture(gl.TEXTURE_2D, this.#color.texture);
+        gl.bindTexture(gl.TEXTURE_2D, this.#jfa.atlas);
 
         this.#shaderSDF.use();
         this.#shaderSDF.setSize(width, height);

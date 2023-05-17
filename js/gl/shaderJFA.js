@@ -4,7 +4,7 @@ import {gl} from "./gl.js";
 export class ShaderJFA extends Shader {
     // language=GLSL
     static SHADER_PACK = `
-        const uint jfaMarkedBit = 1u << 31u;
+        const uint jfaMarkedBit = 1u << 30u;
 
         uint jfaPack(const uint x, const uint y, const bool marked) {
             uint coordinates = x | (y << 15u);
@@ -18,9 +18,7 @@ export class ShaderJFA extends Shader {
         void jfaUnpack(const uint packed, out uvec2 unpacked) {
             const uint mask = (1u << 15u) - 1u;
 
-            unpacked = uvec2(
-                packed & mask,
-                packed >> 15u & mask);
+            unpacked = uvec2(packed, packed >> 15u) & mask;
         }
 
         void jfaUnpack(const uint packed, out uvec2 unpacked, out bool marked) {
@@ -63,18 +61,14 @@ export class ShaderJFA extends Shader {
                     deltas.x * deltas.x + deltas.y * deltas.y,
                     deltas.z * deltas.z + deltas.w * deltas.w);
 
-                if (markedOut) {
-                    if (distances.x < bestDistances.x) {
-                        bestDistances.x = distances.x;
-                        bestCoordinates.x = pixels.x;
-                    }
+                if (markedOut && distances.x < bestDistances.x) {
+                    bestDistances.x = distances.x;
+                    bestCoordinates.x = pixels.x;
                 }
                 
-                if (markedIn) {
-                    if (distances.y < bestDistances.y) {
-                        bestDistances.y = distances.y;
-                        bestCoordinates.y = pixels.y;
-                    }
+                if (markedIn && distances.y < bestDistances.y) {
+                    bestDistances.y = distances.y;
+                    bestCoordinates.y = pixels.y;
                 }
             }
 

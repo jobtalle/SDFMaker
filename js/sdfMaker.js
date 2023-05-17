@@ -16,7 +16,8 @@ export class SDFMaker {
     #settingRadius;
     #settingThreshold;
     #outputContainer;
-    #outputCanvas = null;
+    #outputBlob = null;
+    #outputImage = null;
     #aspect = 1;
     #radius = 1;
     #threshold = .5;
@@ -198,19 +199,15 @@ export class SDFMaker {
         }
     }
 
-    #makeCanvas(width, height, pixels) {
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        const imageData = context.createImageData(width, height);
+    #makeOutputImage(width, height, pixels) {
+        const image = document.createElement("img");
+        const url = URL.createObjectURL(this.#outputBlob = new Blob(
+            [UPNG.encode([pixels], width, height)],
+            { type: "image/png" }));
 
-        imageData.data.set(pixels);
+        image.src = url;
 
-        canvas.width = width;
-        canvas.height = height;
-
-        context.putImageData(imageData, 0, 0);
-
-        return canvas;
+        return image;
     }
 
     #generate() {
@@ -228,22 +225,27 @@ export class SDFMaker {
             this.#inputHeight,
             this.#radius);
 
-        while (this.#outputContainer.firstChild)
-            this.#outputContainer.removeChild(this.#outputContainer.firstChild);
+        const outputImagePrevious = this.#outputImage;
 
-        this.#outputContainer.appendChild(this.#outputCanvas = this.#makeCanvas(
+        this.#outputContainer.appendChild(this.#outputImage = this.#makeOutputImage(
             this.#outputWidth,
             this.#outputHeight,
             this.#composite.pixels));
+
+        if (outputImagePrevious) {
+            this.#outputContainer.removeChild(outputImagePrevious);
+
+            URL.revokeObjectURL(outputImagePrevious.src);
+        }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
     #save() {
-        if (this.#outputCanvas) {
+        if (this.#outputImage) {
             const link = document.createElement("a");
 
-            link.href = this.#outputCanvas.toDataURL("png");
+            link.href = this.#outputImage.src;
             link.download = "image.png";
             link.click();
         }

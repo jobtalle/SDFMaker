@@ -109,6 +109,7 @@ button {
     width: var(--size);
 }
 
+
 #output button {
     margin-top: 4px;
 }
@@ -120,7 +121,7 @@ button {
     margin-right: auto;
 }
 
-#output-container canvas {
+#output-container img {
     background-color: var(--background);
     width: 100%;
     image-rendering: pixelated;

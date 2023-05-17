@@ -15,7 +15,7 @@ export class ShaderSDF extends Shader {
 
         out vec4 color;
 
-        void main() {
+        void main() {            
             uvec2 nearestIn, nearestOut;
             ivec2 atlasCoordinate = ivec2(vUv * vec2(size) + .5);
             uvec2 atlasPixels = texelFetch(atlas, atlasCoordinate, 0).rg;
@@ -40,9 +40,9 @@ export class ShaderSDF extends Shader {
 
         this.use();
 
-        gl.uniform1i(this.uniformLocation("atlas"), 0);
+        gl.uniform1i(this.uniformLocation("sourceColor"), 0);
         gl.uniform1i(this.uniformLocation("source"), 1);
-        gl.uniform1i(this.uniformLocation("sourceColor"), 2);
+        gl.uniform1i(this.uniformLocation("atlas"), 2);
 
         this.#uniformSize = this.uniformLocation("size");
         this.#uniformRadius = this.uniformLocation("radius");
