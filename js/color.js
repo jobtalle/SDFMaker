@@ -37,6 +37,8 @@ export class Color {
         this.#target.bind();
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        this.#target.generateMipmaps();
     }
 
     get texture() {

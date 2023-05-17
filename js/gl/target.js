@@ -60,4 +60,10 @@ export class Target {
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.#fbo);
         gl.viewport(0, 0, this.width, this.height);
     }
+
+    generateMipmaps() {
+        gl.bindTexture(gl.TEXTURE_2D, this.#texture);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    }
 }
