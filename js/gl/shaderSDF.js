@@ -10,6 +10,7 @@ export class ShaderSDF extends Shader {
         uniform sampler2D sourceColor;
         uniform uvec2 size;
         uniform float radius;
+        uniform float threshold;
         
         in vec2 vUv;
 
@@ -25,7 +26,7 @@ export class ShaderSDF extends Shader {
             
             vec3 sourceColor = texture(sourceColor, vUv).rgb;
             
-            if (texelFetch(source, atlasCoordinate, 0).a > .5)
+            if (texelFetch(source, atlasCoordinate, 0).a > threshold)
                 color = vec4(sourceColor, min(1., .5 + length(vec2(atlasCoordinate - ivec2(nearestIn))) / radius));
             else
                 color = vec4(sourceColor, max(0., .5 - length(vec2(atlasCoordinate - ivec2(nearestOut))) / radius));
@@ -34,6 +35,7 @@ export class ShaderSDF extends Shader {
 
     #uniformSize;
     #uniformRadius;
+    #uniformThreshold;
 
     constructor() {
         super(ShaderSDF.#SHADER_FRAGMENT);
@@ -46,6 +48,7 @@ export class ShaderSDF extends Shader {
 
         this.#uniformSize = this.uniformLocation("size");
         this.#uniformRadius = this.uniformLocation("radius");
+        this.#uniformThreshold = this.uniformLocation("threshold");
     }
 
     setSize(width, height) {
@@ -54,5 +57,9 @@ export class ShaderSDF extends Shader {
 
     setRadius(radius) {
         gl.uniform1f(this.#uniformRadius, radius);
+    }
+
+    setThreshold(threshold) {
+        gl.uniform1f(this.#uniformThreshold, threshold);
     }
 }

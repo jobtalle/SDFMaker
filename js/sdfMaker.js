@@ -223,7 +223,8 @@ export class SDFMaker {
         this.#composite.generate(
             this.#inputWidth,
             this.#inputHeight,
-            this.#radius);
+            this.#radius,
+            this.#threshold);
 
         const outputImagePrevious = this.#outputImage;
 
