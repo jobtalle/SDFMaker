@@ -178,24 +178,28 @@ export class SDFMaker {
 
         if (item.kind === "file") {
             const file = item.getAsFile();
+            console.log(file.type)
+            switch (file.type) {
+                case "image/png":
+                case "image/svg+xml":
+                    const reader = new FileReader();
 
-            if (file.type === "image/png") {
-                const reader = new FileReader();
+                    reader.onload = () => {
+                        const image = new Image();
 
-                reader.onload = () => {
-                    const image = new Image();
+                        image.onload = () => {
+                            this.#loadImage(file.name, image);
+                        };
 
-                    image.onload = () => {
-                        this.#loadImage(file.name, image);
+                        image.src = reader.result;
                     };
 
-                    image.src = reader.result;
-                };
+                    reader.readAsDataURL(file);
 
-                reader.readAsDataURL(file);
+                    break;
+                default:
+                    alert("Only .png files are supported");
             }
-            else
-                alert("Only .png files are supported");
         }
     }
 
