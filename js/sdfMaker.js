@@ -178,7 +178,7 @@ export class SDFMaker {
 
         if (item.kind === "file") {
             const file = item.getAsFile();
-            console.log(file.type)
+
             switch (file.type) {
                 case "image/png":
                 case "image/svg+xml":
