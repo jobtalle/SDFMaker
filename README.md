@@ -29,7 +29,7 @@ To render SDF textures, the alpha channel of a pixel should not be interpreted a
 
 ``` glsl
 vec4 pixel = texture(source, uv);
-vec4 color = vec4(pixel.rgb, step(0.5, pixel.a);
+vec4 color = vec4(pixel.rgb, step(0.5, pixel.a));
 ```
 
 This example sets alpha to either `0` or `1`. Edges can also be anti aliased using the following GLSL snippet:
