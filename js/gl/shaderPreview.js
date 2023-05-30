@@ -5,6 +5,7 @@ export class ShaderPreview extends Shader {
     // language=GLSL
     static #SHADER_FRAMGENT = `
         uniform float radius;
+        uniform float radiusPixels;
         uniform vec2 center;
         uniform float aspect;
         uniform float zoom;
@@ -20,9 +21,6 @@ export class ShaderPreview extends Shader {
             vec2 uv = vec2(vUv.x, 1. - vUv.y);
             vec2 delta = vec2(uv.x, uv.y / aspect) - center;
             
-            if (dot(delta, delta) > radius * radius)
-                discard;
-            
             vec4 pixel = texture(source, center + (uv - center) / zoom);
             
             color = vec4(
@@ -30,11 +28,12 @@ export class ShaderPreview extends Shader {
                     vec3(0.),
                     pixel.rgb,
                     clamp((pixel.a - .5) / max(fwidth(pixel.a) * .5, epsilon), 0., 1.)),
-                1.);
+                1. - clamp((length(delta) - radius) * radiusPixels, 0., 1.));
         }
         `;
 
     #uniformRadius;
+    #uniformRadiusPixels;
     #uniformCenter;
     #uniformAspect;
     #uniformZoom;
@@ -45,6 +44,7 @@ export class ShaderPreview extends Shader {
         this.use();
 
         this.#uniformRadius = this.uniformLocation("radius");
+        this.#uniformRadiusPixels = this.uniformLocation("radiusPixels");
         this.#uniformCenter = this.uniformLocation("center");
         this.#uniformAspect = this.uniformLocation("aspect");
         this.#uniformZoom = this.uniformLocation("zoom")
@@ -52,6 +52,10 @@ export class ShaderPreview extends Shader {
 
     setRadius(radius) {
         gl.uniform1f(this.#uniformRadius, radius);
+    }
+
+    setRadiusPixels(radiusPixels) {
+        gl.uniform1f(this.#uniformRadiusPixels, radiusPixels);
     }
 
     setCenter(x, y) {

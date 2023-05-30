@@ -151,22 +151,25 @@ export class SDFMaker {
 
         this.#shaderPreview.use();
         this.#shaderPreview.setRadius(SDFMaker.#PREVIEW_RADIUS / SDFMaker.#SIZE);
+        this.#shaderPreview.setRadiusPixels(SDFMaker.#SIZE);
 
         window.addEventListener("mousemove", event => {
-            const wasVisible = this.#previewVisible;
-            const previewRect = previewCanvas.getBoundingClientRect();
+            if (this.#outputImage) {
+                const wasVisible = this.#previewVisible;
+                const previewRect = previewCanvas.getBoundingClientRect();
 
-            this.#previewX = event.clientX - previewRect.left;
-            this.#previewY = event.clientY - previewRect.top;
+                this.#previewX = event.clientX - previewRect.left;
+                this.#previewY = event.clientY - previewRect.top;
 
-            this.#previewVisible =
-                this.#previewX > -SDFMaker.#PREVIEW_RADIUS &&
-                this.#previewY > -SDFMaker.#PREVIEW_RADIUS &&
-                this.#previewX < SDFMaker.#SIZE + SDFMaker.#PREVIEW_RADIUS &&
-                this.#previewY < SDFMaker.#SIZE + SDFMaker.#PREVIEW_RADIUS;
+                this.#previewVisible =
+                    this.#previewX > -SDFMaker.#PREVIEW_RADIUS &&
+                    this.#previewY > -SDFMaker.#PREVIEW_RADIUS &&
+                    this.#previewX < SDFMaker.#SIZE + SDFMaker.#PREVIEW_RADIUS &&
+                    this.#previewY < SDFMaker.#SIZE + SDFMaker.#PREVIEW_RADIUS;
 
-            if (this.#previewVisible || this.#previewVisible !== wasVisible)
-                this.#updated = true;
+                if (this.#previewVisible || this.#previewVisible !== wasVisible)
+                    this.#updated = true;
+            }
         });
 
         inputTarget.addEventListener("mousedown", () => {
@@ -221,6 +224,15 @@ export class SDFMaker {
 
         gl.bindTexture(gl.TEXTURE_2D, this.#input);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.#inputTarget);
+
+        if (this.#outputImage) {
+            this.#outputContainer.removeChild(this.#outputImage);
+
+            URL.revokeObjectURL(this.#outputImage.src);
+
+            this.#outputImage = null;
+            this.#updated = true;
+        }
 
         this.#loaded = true;
     }
@@ -288,18 +300,10 @@ export class SDFMaker {
             this.#radius,
             this.#threshold);
 
-        const outputImagePrevious = this.#outputImage;
-
         this.#outputContainer.appendChild(this.#outputImage = this.#makeOutputImage(
             this.#outputWidth,
             this.#outputHeight,
             this.#composite.pixels));
-
-        if (outputImagePrevious) {
-            this.#outputContainer.removeChild(outputImagePrevious);
-
-            URL.revokeObjectURL(outputImagePrevious.src);
-        }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -317,7 +321,7 @@ export class SDFMaker {
     }
 
     #render() {
-        if (this.#updated && this.#outputImage) {
+        if (this.#updated) {
             gl.clear(gl.COLOR_BUFFER_BIT);
 
             if (this.#previewVisible) {
