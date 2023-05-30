@@ -7,7 +7,8 @@ import {ShaderPreview} from "./gl/shaderPreview.js";
 export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
     static #SIZE = Number.parseInt(getComputedStyle(document.body).getPropertyValue("--size"));
-    static #PREVIEW_RADIUS = SDFMaker.#SIZE * .25;
+    static #PREVIEW_RADIUS = SDFMaker.#SIZE * .2;
+    static #SVG_UPSCALE = 2048;
 
     #inputTarget;
     #inputMessage;
@@ -177,16 +178,24 @@ export class SDFMaker {
         this.#shaderPreview.setAspect(this.#previewCanvas.width / this.#previewCanvas.height);
     }
 
-    #loadImage(name, image) {
+    #loadImage(name, image, upscale) {
+        const scale = upscale ? Math.min(
+            SDFMaker.#SVG_UPSCALE / image.width,
+            SDFMaker.#SVG_UPSCALE / image.height) : 1;
+
+        this.#settingWidth.value = this.#outputWidth = image.width;
+        this.#settingHeight.value = this.#outputHeight = image.height;
+
         this.#settingWidth.disabled = this.#settingHeight.disabled = this.#settingRadius.disabled = this.#settingThreshold.disabled = false;
         this.#inputMessage.style.display = "none";
         this.#inputInfo.innerText = `
             Name: ${name}
-            Size: ${image.width} x ${image.height}
+            Size: ${this.#outputWidth} x ${this.#outputHeight}
             `;
 
-        this.#settingWidth.value = this.#inputTarget.width = this.#inputWidth = this.#outputWidth = image.width;
-        this.#settingHeight.value = this.#inputTarget.height = this.#inputHeight = this.#outputHeight = image.height;
+        this.#inputTarget.width = this.#inputWidth = Math.round(image.width * scale);
+        this.#inputTarget.height = this.#inputHeight = Math.round(image.height * scale);
+
         this.#aspect = image.width / image.height;
 
         this.#resizePreview();
@@ -194,10 +203,12 @@ export class SDFMaker {
         this.#inputTarget.getContext("2d").drawImage(
             image,
             0,
-            0);
+            0,
+            this.#inputWidth,
+            this.#inputHeight);
 
         gl.bindTexture(gl.TEXTURE_2D, this.#input);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.#inputTarget);
 
         this.#loaded = true;
     }
@@ -210,17 +221,20 @@ export class SDFMaker {
 
         if (item.kind === "file") {
             const file = item.getAsFile();
+            let upscale = false;
 
             switch (file.type) {
-                case "image/png":
                 case "image/svg+xml":
+                    upscale = true;
+
+                case "image/png":
                     const reader = new FileReader();
 
                     reader.onload = () => {
                         const image = new Image();
 
                         image.onload = () => {
-                            this.#loadImage(file.name, image);
+                            this.#loadImage(file.name, image, upscale);
                         };
 
                         image.src = reader.result;
