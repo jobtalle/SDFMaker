@@ -22,3 +22,22 @@ The quality of the output SDF can be previewed by hovering the cursor over the l
 ## PNG output
 
 The tool uses [UPNG.js](https://github.com/photopea/UPNG.js/) to produce output .PNG images, since not all browsers can produce .PNG images with colorized transparent pixels natively. In many cases, transparent pixels will become black, losing their color. This causes problems with mipmapping, since the black color blends into the neighboring pixels when downscaling to lower mipmap levels. This tool sets the color of transparent pixels to the color of the nearest opaque pixel and uses UPNG.js generate the output image, preventing the issue.
+
+## Rendering SDF edges in GLSL
+
+To render SDF textures, the alpha channel of a pixel should not be interpreted as the transparency of that pixel, but rather as the distance to the edge of the image, where `0.5` is exactly on the edge. The following GLSL snippet outputs transparent pixels whenever they are outside the shape:
+
+``` glsl
+vec4 pixel = texture(source, uv);
+vec4 color = vec4(pixel.rgb, step(0.5, pixel.a);
+```
+
+This example sets opacity to either `0` or `1`. Edges can also be anti aliased using the following GLSL snippet:
+
+``` glsl
+const float epsilon = 0.000001;
+
+vec4 pixel = texture(source, uv);
+float alpha = clamp((pixel.a - .5) / max(fwidth(pixel.a) * .5, epsilon), 0., 1.);
+vec4 color = vec4(pixel.rgb, alpha);
+```
