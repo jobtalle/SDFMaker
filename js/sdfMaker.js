@@ -225,6 +225,12 @@ export class SDFMaker {
         gl.bindTexture(gl.TEXTURE_2D, this.#input);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.#inputTarget);
 
+        this.#clearOutputImage();
+
+        this.#loaded = true;
+    }
+
+    #clearOutputImage() {
         if (this.#outputImage) {
             this.#outputContainer.removeChild(this.#outputImage);
 
@@ -233,8 +239,6 @@ export class SDFMaker {
             this.#outputImage = null;
             this.#updated = true;
         }
-
-        this.#loaded = true;
     }
 
     #onDrop(event) {
@@ -300,6 +304,8 @@ export class SDFMaker {
             this.#radius,
             this.#threshold);
 
+        this.#clearOutputImage();
+
         this.#outputContainer.appendChild(this.#outputImage = this.#makeOutputImage(
             this.#outputWidth,
             this.#outputHeight,
@@ -324,7 +330,7 @@ export class SDFMaker {
         if (this.#updated) {
             gl.clear(gl.COLOR_BUFFER_BIT);
 
-            if (this.#previewVisible) {
+            if (this.#previewVisible && this.#outputImage) {
                 this.#shaderPreview.use();
                 this.#shaderPreview.setCenter(this.#previewX / SDFMaker.#SIZE, this.#previewY / SDFMaker.#SIZE);
                 this.#shaderPreview.setZoom(this.#previewZoom ? SDFMaker.#PREVIEW_ZOOM : 1);
