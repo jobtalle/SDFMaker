@@ -36,16 +36,9 @@ vec4 color = vec4(pixel.rgb, step(0.5, pixel.a));
 This example sets alpha to either `0` or `1`. Edges can also be anti aliased using the following GLSL snippet:
 
 ``` glsl
-const float epsilon = 0.000001;
-
 vec4 pixel = texture(source, uv);
 
-float distance = fwidth(pixel.a) * .5;
-float lower = .5 - distance;
-float upper = .5 + distance;
-float alpha = clamp((pixel.a - lower) / (upper - lower), 0., 1.));
-
-vec4 color = vec4(pixel.rgb, alpha);
+vec4 color = vec4(pixel.rgb, clamp(0.5 - pixel.a * 2.0 / fwidth(pixel.a), 0., 1.)));
 ```
 
-This example interpolates alpha from `0` to `1`, creating smooth anti aliased edges.
+This example interpolates alpha from `0` to `1` using standard derivatives, creating smooth anti aliased edges.

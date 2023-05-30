@@ -31,7 +31,7 @@ export class ShaderPreview extends Shader {
                 mix(
                     vec3(0.),
                     pixel.rgb,
-                    clamp((pixel.a - lower) / (upper - lower), 0., 1.)),
+                    clamp(.5 - pixel.a * 2. / fwidth(pixel.a), 0., 1.)),
                 1. - clamp((length(delta) - radius) * radiusPixels, 0., 1.));
         }
     `;
