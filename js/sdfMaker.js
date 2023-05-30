@@ -2,10 +2,12 @@ import {gl} from "./gl/gl.js";
 import {JFA} from "./jfa.js";
 import {Color} from "./color.js";
 import {Composite} from "./composite.js";
+import {ShaderPreview} from "./gl/shaderPreview.js";
 
 export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
     static #SIZE = Number.parseInt(getComputedStyle(document.body).getPropertyValue("--size"));
+    static #PREVIEW_RADIUS = SDFMaker.#SIZE * .25;
 
     #inputTarget;
     #inputMessage;
@@ -25,12 +27,17 @@ export class SDFMaker {
     #inputHeight = 1;
     #outputWidth = 1;
     #outputHeight = 1;
+    #previewX = -1;
+    #previewY = -1;
+    #previewVisible = false;
 
     #input = gl.createTexture();
     #jfa = new JFA(this.#input);
     #color = new Color(this.#input, this.#jfa);
     #composite = new Composite(this.#input, this.#jfa, this.#color);
     #loaded = false;
+    #shaderPreview = new ShaderPreview();
+    #updated = true;
 
     constructor(
         inputTarget,
@@ -138,11 +145,36 @@ export class SDFMaker {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+        this.#shaderPreview.use();
+        this.#shaderPreview.setRadius(SDFMaker.#PREVIEW_RADIUS / SDFMaker.#SIZE);
+
+        window.addEventListener("mousemove", event => {
+            const wasVisible = this.#previewVisible;
+            const previewRect = previewCanvas.getBoundingClientRect();
+
+            this.#previewX = event.clientX - previewRect.left;
+            this.#previewY = event.clientY - previewRect.top;
+
+            this.#previewVisible =
+                this.#previewX > -SDFMaker.#PREVIEW_RADIUS &&
+                this.#previewY > -SDFMaker.#PREVIEW_RADIUS &&
+                this.#previewX < SDFMaker.#SIZE + SDFMaker.#PREVIEW_RADIUS &&
+                this.#previewY < SDFMaker.#SIZE + SDFMaker.#PREVIEW_RADIUS;
+
+            if (this.#previewVisible || this.#previewVisible !== wasVisible)
+                this.#updated = true;
+        });
+
+        this.#render();
     }
 
     #resizePreview() {
         this.#previewCanvas.width = SDFMaker.#SIZE;
         this.#previewCanvas.height = Math.round(SDFMaker.#SIZE / this.#aspect);
+
+        this.#shaderPreview.use();
+        this.#shaderPreview.setAspect(this.#previewCanvas.width / this.#previewCanvas.height);
     }
 
     #loadImage(name, image) {
@@ -244,6 +276,8 @@ export class SDFMaker {
         }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        this.#updated = true;
     }
 
     #save() {
@@ -254,5 +288,25 @@ export class SDFMaker {
             link.download = "image.png";
             link.click();
         }
+    }
+
+    #render() {
+        if (this.#updated && this.#outputImage) {
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            if (this.#previewVisible) {
+                this.#shaderPreview.use();
+                this.#shaderPreview.setCenter(this.#previewX / SDFMaker.#SIZE, this.#previewY / SDFMaker.#SIZE);
+
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, this.#composite.texture);
+                gl.viewport(0, 0, this.#previewCanvas.width, this.#previewCanvas.height);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }
+
+            this.#updated = false;
+        }
+
+        requestAnimationFrame(this.#render.bind(this));
     }
 }

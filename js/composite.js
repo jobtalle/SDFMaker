@@ -7,7 +7,7 @@ export class Composite {
     #jfa;
     #color;
     #shaderSDF = new ShaderSDF();
-    #target = new Target();
+    #target = new Target(gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, gl.LINEAR);
     #pixels = null;
 
     constructor(input, jfa, color) {
@@ -26,6 +26,10 @@ export class Composite {
 
     get pixels() {
         return this.#pixels;
+    }
+
+    get texture() {
+        return this.#target.texture;
     }
 
     setSize(width, height) {

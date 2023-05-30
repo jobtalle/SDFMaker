@@ -10,7 +10,11 @@ export class Target {
     width = -1;
     height = -1;
 
-    constructor(internalFormat = gl.RGBA8, format = gl.RGBA, type = gl.UNSIGNED_BYTE) {
+    constructor(
+        internalFormat = gl.RGBA8,
+        format = gl.RGBA,
+        type = gl.UNSIGNED_BYTE,
+        filter = gl.NEAREST) {
         this.#internalFormat = internalFormat;
         this.#format = format;
         this.#type = type;
@@ -19,8 +23,8 @@ export class Target {
 
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
     }
 
     get texture() {
