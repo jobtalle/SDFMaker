@@ -8,6 +8,7 @@ export class SDFMaker {
     static #INPUT_TARGET_HOVER = "hover";
     static #SIZE = Number.parseInt(getComputedStyle(document.body).getPropertyValue("--size"));
     static #PREVIEW_RADIUS = SDFMaker.#SIZE * .2;
+    static #PREVIEW_ZOOM = 2;
     static #SVG_UPSCALE = 2048;
 
     #inputTarget;
@@ -31,6 +32,7 @@ export class SDFMaker {
     #previewX = -1;
     #previewY = -1;
     #previewVisible = false;
+    #previewZoom = false;
 
     #input = gl.createTexture();
     #jfa = new JFA(this.#input);
@@ -165,6 +167,16 @@ export class SDFMaker {
 
             if (this.#previewVisible || this.#previewVisible !== wasVisible)
                 this.#updated = true;
+        });
+
+        inputTarget.addEventListener("mousedown", () => {
+            this.#previewZoom = true;
+            this.#updated = true;
+        });
+
+        window.addEventListener("mouseup", () => {
+            this.#previewZoom = false;
+            this.#updated = true;
         });
 
         this.#render();
@@ -311,6 +323,7 @@ export class SDFMaker {
             if (this.#previewVisible) {
                 this.#shaderPreview.use();
                 this.#shaderPreview.setCenter(this.#previewX / SDFMaker.#SIZE, this.#previewY / SDFMaker.#SIZE);
+                this.#shaderPreview.setZoom(this.#previewZoom ? SDFMaker.#PREVIEW_ZOOM : 1);
 
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, this.#composite.texture);

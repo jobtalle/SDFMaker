@@ -7,6 +7,7 @@ export class ShaderPreview extends Shader {
         uniform float radius;
         uniform vec2 center;
         uniform float aspect;
+        uniform float zoom;
         uniform sampler2D source;
         
         in vec2 vUv;
@@ -22,7 +23,7 @@ export class ShaderPreview extends Shader {
             if (dot(delta, delta) > radius * radius)
                 discard;
             
-            vec4 pixel = texture(source, uv);
+            vec4 pixel = texture(source, center + (uv - center) / zoom);
             
             color = vec4(
                 mix(
@@ -36,6 +37,7 @@ export class ShaderPreview extends Shader {
     #uniformRadius;
     #uniformCenter;
     #uniformAspect;
+    #uniformZoom;
 
     constructor() {
         super(ShaderPreview.#SHADER_FRAMGENT);
@@ -45,6 +47,7 @@ export class ShaderPreview extends Shader {
         this.#uniformRadius = this.uniformLocation("radius");
         this.#uniformCenter = this.uniformLocation("center");
         this.#uniformAspect = this.uniformLocation("aspect");
+        this.#uniformZoom = this.uniformLocation("zoom")
     }
 
     setRadius(radius) {
@@ -57,5 +60,9 @@ export class ShaderPreview extends Shader {
 
     setAspect(aspect) {
         gl.uniform1f(this.#uniformAspect, aspect);
+    }
+
+    setZoom(zoom) {
+        gl.uniform1f(this.#uniformZoom, zoom);
     }
 }
