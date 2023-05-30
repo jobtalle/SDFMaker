@@ -32,12 +32,14 @@ vec4 pixel = texture(source, uv);
 vec4 color = vec4(pixel.rgb, step(0.5, pixel.a);
 ```
 
-This example sets opacity to either `0` or `1`. Edges can also be anti aliased using the following GLSL snippet:
+This example sets alpha to either `0` or `1`. Edges can also be anti aliased using the following GLSL snippet:
 
 ``` glsl
 const float epsilon = 0.000001;
 
 vec4 pixel = texture(source, uv);
-float alpha = clamp((pixel.a - .5) / max(fwidth(pixel.a) * .5, epsilon), 0., 1.);
+float alpha = clamp((pixel.a - 0.5) / max(fwidth(pixel.a) * 0.5, epsilon), 0.0, 1.0);
 vec4 color = vec4(pixel.rgb, alpha);
 ```
+
+This example interpolates alpha from `0` to `1`, creating smooth anti aliased edges.
