@@ -10,27 +10,31 @@ export class ShaderPreview extends Shader {
         uniform float aspect;
         uniform float zoom;
         uniform sampler2D source;
-        
+
         in vec2 vUv;
-        
+
         out vec4 color;
-        
+
         void main() {
             const float epsilon = .000001;
-            
+
             vec2 uv = vec2(vUv.x, 1. - vUv.y);
             vec2 delta = vec2(uv.x, uv.y / aspect) - center;
-            
+
             vec4 pixel = texture(source, center + (uv - center) / zoom);
-            
+
+            float distance = fwidth(pixel.a) * .5;
+            float lower = .5 - distance;
+            float upper = .5 + distance;
+
             color = vec4(
                 mix(
                     vec3(0.),
                     pixel.rgb,
-                    clamp((pixel.a - .5) / max(fwidth(pixel.a) * .5, epsilon), 0., 1.)),
+                    clamp((pixel.a - lower) / (upper - lower), 0., 1.)),
                 1. - clamp((length(delta) - radius) * radiusPixels, 0., 1.));
         }
-        `;
+    `;
 
     #uniformRadius;
     #uniformRadiusPixels;

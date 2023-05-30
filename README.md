@@ -29,6 +29,7 @@ To render SDF textures, the alpha channel of a pixel should not be interpreted a
 
 ``` glsl
 vec4 pixel = texture(source, uv);
+
 vec4 color = vec4(pixel.rgb, step(0.5, pixel.a));
 ```
 
@@ -38,7 +39,12 @@ This example sets alpha to either `0` or `1`. Edges can also be anti aliased usi
 const float epsilon = 0.000001;
 
 vec4 pixel = texture(source, uv);
-float alpha = clamp((pixel.a - 0.5) / max(fwidth(pixel.a) * 0.5, epsilon), 0.0, 1.0);
+
+float distance = fwidth(pixel.a) * .5;
+float lower = .5 - distance;
+float upper = .5 + distance;
+float alpha = clamp((pixel.a - lower) / (upper - lower), 0., 1.));
+
 vec4 color = vec4(pixel.rgb, alpha);
 ```
 
