@@ -23,10 +23,6 @@ export class ShaderPreview extends Shader {
 
             vec4 pixel = texture(source, center + (uv - center) / zoom);
 
-            float distance = fwidth(pixel.a) * .5;
-            float lower = .5 - distance;
-            float upper = .5 + distance;
-
             color = vec4(
                 mix(
                     vec3(0.),
