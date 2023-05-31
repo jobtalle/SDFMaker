@@ -21,7 +21,7 @@ The quality of the output SDF can be previewed by hovering the cursor over the l
 
 ## PNG output
 
-The tool uses [UPNG.js](https://github.com/photopea/UPNG.js/) to produce output .PNG images, since not all browsers can produce .PNG images with colorized transparent pixels natively. In many cases, transparent pixels will become black, losing their color. This causes problems with mipmapping, since the black color blends into the neighboring pixels when downscaling to lower mipmap levels. This tool sets the color of transparent pixels to the color of the nearest opaque pixel and uses UPNG.js generate the output image, preventing the issue.
+The tool uses [UPNG.js](https://github.com/photopea/UPNG.js/) to produce output .PNG images, since not all browsers can produce .PNG images with colorized transparent pixels. In many cases, transparent pixels will become black. This causes problems with mipmapping, since the black color blends into the neighboring pixels when downscaling to lower mipmap levels. This tool sets the color of transparent pixels to the color of the nearest opaque pixel and uses UPNG.js generate the output image, preventing this issue.
 
 This image shows the difference between colorized transparent pixels (left) and black transparent pixels (right):
 
