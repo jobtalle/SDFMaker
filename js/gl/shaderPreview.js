@@ -16,11 +16,8 @@ export class ShaderPreview extends Shader {
         out vec4 color;
 
         void main() {
-            const float epsilon = .000001;
-
             vec2 uv = vec2(vUv.x, 1. - vUv.y);
             vec2 delta = vec2(uv.x, uv.y / aspect) - center;
-
             vec4 pixel = texture(source, center + (uv - center) / zoom);
 
             color = vec4(
