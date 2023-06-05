@@ -50,6 +50,7 @@ button {
 
 #columns {
     display: flex;
+    flex-wrap: wrap;
 }
 
 .column > .panel {
