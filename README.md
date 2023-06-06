@@ -1,5 +1,5 @@
 # SDF Maker
-A tool for converting high resolution images or textures with transparency to low resolution images with signed distance fields.
+A web tool for converting high resolution images or textures with transparency to low resolution images with signed distance fields.
 [Runs in a browser!](https://jobtalle.com/SDFMaker)
 
 [This blog post](https://jobtalle.com/distance_field_transparency.html) explains the algorithm behind this tool and goes into details about using SDF textures.
