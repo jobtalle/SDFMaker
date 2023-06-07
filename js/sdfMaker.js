@@ -52,6 +52,7 @@ export class SDFMaker {
         settingRadius,
         settingThreshold,
         outputContainer,
+        buttonUpload,
         buttonGenerate,
         buttonSave) {
         inputTarget.ondrop = event => {
@@ -129,6 +130,9 @@ export class SDFMaker {
             settingThreshold.value = this.#threshold;
         };
 
+        buttonUpload.oninput = () => {
+            this.#upload(buttonUpload.files[0]);
+        };
         buttonGenerate.onclick = this.#generate.bind(this);
         buttonSave.onclick = this.#save.bind(this);
 
@@ -242,40 +246,42 @@ export class SDFMaker {
         }
     }
 
+    #processFile(file) {
+        let upscale = false;
+
+        switch (file.type) {
+            case "image/svg+xml":
+                upscale = true;
+
+            case "image/png":
+                const reader = new FileReader();
+
+                reader.onload = () => {
+                    const image = new Image();
+
+                    image.onload = () => {
+                        this.#loadImage(file.name, image, upscale);
+                    };
+
+                    image.src = reader.result;
+                };
+
+                reader.readAsDataURL(file);
+
+                break;
+            default:
+                alert("Only .png files are supported");
+        }
+    }
+
     #onDrop(event) {
         if (!event.dataTransfer.items)
             return;
 
         const item = event.dataTransfer.items[0];
 
-        if (item.kind === "file") {
-            const file = item.getAsFile();
-            let upscale = false;
-
-            switch (file.type) {
-                case "image/svg+xml":
-                    upscale = true;
-
-                case "image/png":
-                    const reader = new FileReader();
-
-                    reader.onload = () => {
-                        const image = new Image();
-
-                        image.onload = () => {
-                            this.#loadImage(file.name, image, upscale);
-                        };
-
-                        image.src = reader.result;
-                    };
-
-                    reader.readAsDataURL(file);
-
-                    break;
-                default:
-                    alert("Only .png files are supported");
-            }
-        }
+        if (item.kind === "file")
+            this.#processFile(item.getAsFile());
     }
 
     #makeOutputImage(width, height, pixels) {
@@ -287,6 +293,10 @@ export class SDFMaker {
         image.src = url;
 
         return image;
+    }
+
+    #upload(file) {
+        this.#processFile(file);
     }
 
     #generate() {

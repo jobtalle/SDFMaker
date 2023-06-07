@@ -10,6 +10,7 @@ new SDFMaker(
     document.getElementById("setting-radius"),
     document.getElementById("setting-threshold"),
     document.getElementById("output-container"),
+    document.getElementById("button-upload"),
     document.getElementById("button-generate"),
     document.getElementById("button-save")
 );
