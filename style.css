@@ -4,6 +4,7 @@
     --link: #de5840;
     --background: #3d4549;
     --size: 500px;
+    --padding: 8px;
 }
 
 body {
@@ -12,6 +13,8 @@ body {
     color: var(--bright);
     display: flex;
     justify-content: center;
+    margin: 0;
+    overflow-x: hidden;
 }
 
 body a {
@@ -32,14 +35,10 @@ button {
     width: 100%;
 }
 
-.panel {
-    border: 1px solid var(--bright);
-    padding: 8px;
-}
-
 #wrapper {
     display: flex;
     flex-direction: column;
+    max-width: 100%;
 }
 
 #wrapper h1 {
@@ -57,22 +56,29 @@ button {
 #columns {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .column > .panel {
-    margin: 4px;
+    border: 1px solid var(--bright);
+    padding: var(--padding);
+    margin: var(--padding);
+    max-width: calc(100vw - 4 * var(--padding));
 }
 
 #input {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    flex-wrap: wrap;
     gap: 16px;
 }
 
 #input-left {
+    position: relative;
     display: flex;
     flex-direction: column;
     width: var(--size);
+    max-width: calc(100% - 4 * var(--padding));
 }
 
 #input-right {
@@ -91,6 +97,7 @@ button {
     position: absolute;
     pointer-events: none;
     width: var(--size);
+    max-width: 100%;
 }
 
 #input-target {

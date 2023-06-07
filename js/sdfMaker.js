@@ -157,9 +157,10 @@ export class SDFMaker {
             if (this.#outputImage) {
                 const wasVisible = this.#previewVisible;
                 const previewRect = previewCanvas.getBoundingClientRect();
+                const previewScale = SDFMaker.#SIZE / previewRect.width;
 
-                this.#previewX = event.clientX - previewRect.left;
-                this.#previewY = event.clientY - previewRect.top;
+                this.#previewX = (event.clientX - previewRect.left) * previewScale;
+                this.#previewY = (event.clientY - previewRect.top) * previewScale;
 
                 this.#previewVisible =
                     this.#previewX > -SDFMaker.#PREVIEW_RADIUS &&
