@@ -136,7 +136,9 @@ button {
 }
 
 #output-container img {
-    background-color: var(--background);
+    background: 
+    repeating-conic-gradient(#808080 0% 25%, transparent 0% 50%) 
+      50% / 20px 20px;
     width: 100%;
     image-rendering: pixelated;
 }
